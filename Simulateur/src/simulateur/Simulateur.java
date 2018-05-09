@@ -1,7 +1,6 @@
 package simulateur;
 
 import configurateur.Configurateur;
-import exceptions.one_event_by_line.OneEventByLineEcrireFormatCSVException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,10 +9,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import exceptions.one_event_by_line.OneEventByLineFichierIntrouvableException;
-import exceptions.one_event_by_line.OneEventByLineFormatException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.NavigableSet;
+import exceptions.one_event_by_line.* ;
+import exceptions.fichier_config.* ;
 import util.Util;
 
 public class Simulateur {
@@ -53,11 +52,14 @@ public class Simulateur {
      * si le fichier n'existe pas.<p>
      * @throws OneEventByLineFormatException
      * si une ligne du fichier ne correspond pas au format attendu.<p>
+     * @throws exceptions.one_event_by_line.OneEventByLineNomObjetIntrouvableException
+     * si l'objet lue sur la ligne n'a pas été répertorié par le configurateur
      * @since V0
      * @see ecrireFormatCSV
      */
     
-    public void lireFormatOneEventByLine (String nomFichierEntree) throws OneEventByLineFichierIntrouvableException, OneEventByLineFormatException {
+    public void lireFormatOneEventByLine (String nomFichierEntree) throws OneEventByLineFichierIntrouvableException, OneEventByLineFormatException, OneEventByLineNomObjetIntrouvableException {
+	List<String> nomsObjets = configurateur.getNomsObjets() ;
 	try (Scanner scanner = new Scanner(new File(nomFichierEntree))) {
 	    scanner.useDelimiter("");
 	    int numLigne = 0 ;
@@ -66,16 +68,22 @@ public class Simulateur {
 		    scanner.skip(SKIP);
 		    numLigne++ ;
 		}
-		String ligne = scanner.nextLine() ;
-		try(Scanner scannerLigne = new Scanner(ligne)) {
-		    String donnees = scannerLigne.findInLine(PATTERN_ONE_EVENT_BY_LINE) ;
-		    numLigne++ ;
-		    if (donnees != null) {
-			ligneDecoupee = donnees.split(SEPARATEUR) ;
-			evenements.add(new Evenement(ligneDecoupee)) ;
-		    }
-		    else {
-			throw new OneEventByLineFormatException(numLigne, ligne, nomFichierEntree);
+		if (scanner.hasNext()) {
+		    String ligne = scanner.nextLine() ;
+		    try(Scanner scannerLigne = new Scanner(ligne)) {
+			String donnees = scannerLigne.findInLine(PATTERN_ONE_EVENT_BY_LINE) ;
+			numLigne++ ;
+			if (donnees != null) {
+			    ligneDecoupee = donnees.split(SEPARATEUR) ;
+			    
+			    if (nomsObjets.contains(ligneDecoupee[1]))
+				evenements.add(new Evenement(ligneDecoupee)) ;
+			    else
+				throw new OneEventByLineNomObjetIntrouvableException(ligneDecoupee[1], numLigne, nomFichierEntree);
+			}
+			else {
+			    throw new OneEventByLineFormatException(numLigne, ligne, nomFichierEntree);
+			}
 		    }
 		}
 	    }
@@ -90,11 +98,13 @@ public class Simulateur {
      * * Le chemin (absolu ou relatif) <p> + nom du fichier où seront écrites les données
      * @throws OneEventByLineEcrireFormatCSVException
      * si une erreur d'entrée/sortie est apparue lors de l'écriture
+     * @since V0
+     * @see lireFormatOneEventByLine
      */
     public void ecrireFormatCSV (String nomFichierSortie) throws OneEventByLineEcrireFormatCSVException {
 	try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie))) {
 	    bufferedWriter.write("timestamp"+Evenement.SEPARATEUR) ;
-	    Collection<String> nomsObjets = configurateur.getNomsObjets() ;
+	    List<String> nomsObjets = configurateur.getNomsObjets() ;
 	    int n = nomsObjets.size() ;
 	    for (String nomObjet : nomsObjets)
 		bufferedWriter.write(nomObjet + (--n > 0 ? Evenement.SEPARATEUR : "\n")) ;
@@ -112,11 +122,15 @@ public class Simulateur {
     public static void main(String[] args) {
 	try {
 	    Simulateur simulateur = new Simulateur(new Configurateur("ressources/fichier_config.txt")) ;
+	    simulateur.lireFormatOneEventByLine("test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt");
 	    simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
 	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
-	} catch (OneEventByLineEcrireFormatCSVException ex) {
+	} catch (
+		OneEventByLineFichierIntrouvableException | OneEventByLineFormatException | OneEventByLineEcrireFormatCSVException | OneEventByLineNomObjetIntrouvableException
+		|ConfigNomObjetException | ConfigFichierIntrouvableException ex) {
 	    ex.terminerExecutionSimulateur();
 	}
+	
     }
     
 }

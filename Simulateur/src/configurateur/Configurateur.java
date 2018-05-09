@@ -1,45 +1,64 @@
 package configurateur;
 
+import exceptions.fichier_config.ConfigFichierIntrouvableException;
+import exceptions.fichier_config.ConfigNomObjetException;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.NavigableMap;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Scanner;
-import java.util.TreeMap;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 public class Configurateur {
     
-    private final NavigableMap<Integer, String> nomsObjets = new TreeMap<>(Comparator.naturalOrder());
+    private final Set<String> nomsObjets = new HashSet<>();
+    private final List<String> posNomsObjets = new ArrayList() ;
+    private static final Pattern SKIP = Pattern.compile("[^\\S\\n]*\\n") ;
 
-    public Configurateur(String nomFichierEntree) {
+    public Configurateur(String nomFichierEntree) throws ConfigNomObjetException, ConfigFichierIntrouvableException {
 	lireObjets(nomFichierEntree);
     }
-    
 
-    public Collection<String> getNomsObjets() {
-	return nomsObjets.values() ;
+    public List<String> getNomsObjets() {
+	return posNomsObjets ;
     }
     
-    public final void lireObjets (String nomFichierEntree) {
+    /**
+     * Lit un fichier de configuration listant les objets utilisés dans la simulation
+     * 
+     * @param nomFichierEntree
+     * Le chemin (absolu ou relatif) <p> + nom du fichier de configuration à lire
+     * @throws ConfigNomObjetException
+     * @throws ConfigFichierIntrouvableException
+     */
+    public final void lireObjets (String nomFichierEntree) throws ConfigNomObjetException, ConfigFichierIntrouvableException {
 	int pos = 0 ;
 	try (Scanner scanner = new Scanner(new File(nomFichierEntree))) {
-	    scanner.useDelimiter("\\s*\n+");
+	    scanner.useDelimiter("");
+	    int numLigne = 0 ;
 	    while (scanner.hasNext()) {
-		String nomObjet = scanner.next() ;
-		if (nomObjet.matches("\\w+"))
-		    nomsObjets.put(pos++, nomObjet) ;
-		else {
-		    System.err.println("L'objet " + "\"" + nomObjet + "\" a un nom incorrect.") ;
-		    scanner.close();
-		    System.exit(2);
+		while (scanner.hasNext(SKIP)) {
+		    scanner.skip(SKIP);
+		    numLigne++ ;
+		}
+		if (scanner.hasNext()) {
+		    String ligne = scanner.nextLine() ;
+		    try(Scanner scannerLigne = new Scanner(ligne)) {
+			String nomObjet = scannerLigne.findInLine("\\w+") ;
+			numLigne++ ;
+			if (nomObjet != null) {
+			    posNomsObjets.add(nomObjet);
+			    nomsObjets.add(nomObjet);
+			} else {
+			    throw new ConfigNomObjetException(nomObjet, numLigne, nomFichierEntree) ;
+			}
+		    }
 		}
 	    }
 	} catch (FileNotFoundException ex) {
-	    System.err.println("Le fichier de configuration " + nomFichierEntree + " n'existe pas");
-	    System.exit(1);
+	    throw new ConfigFichierIntrouvableException(ex, nomFichierEntree);
 	}
-	
     }
-    
 }
