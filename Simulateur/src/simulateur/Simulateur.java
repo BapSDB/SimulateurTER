@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import util.Util;
-import exceptions.FichierOneEventByLineIntrouvableException;
+import exceptions.OneEventByLineFichierIntrouvableException;
 import exceptions.OneEventByLineFormatException;
 import java.util.ArrayList;
 
@@ -30,6 +30,7 @@ public class Simulateur {
     private static final String NOM_OBJET = "\\w+" ;
     private static final String VALEUR = "\\w+" ;
     private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
+    private static final Pattern SKIP = Pattern.compile("[^\\S\\n]*\\n") ;
 
     public Simulateur(Configurateur configurateur) {
 	this.configurateur = configurateur;
@@ -46,39 +47,44 @@ public class Simulateur {
      * Format attendu par ligne : timestamp ; objet ; value
      * @param nomFichierEntree
      * Le chemin (absolu ou relatif) <p> + nom du fichier one-event-by-line à lire
-     * @throws FichierOneEventByLineIntrouvableException
+     * @throws OneEventByLineFichierIntrouvableException
      * si le fichier n'existe pas.<p>
      * @throws OneEventByLineFormatException
      * si une ligne du fichier ne correspond pas au format attendu.<p>
      * @since V0
      */
-    private void lireFormatOneEventByLine (String nomFichierEntree) throws FichierOneEventByLineIntrouvableException, OneEventByLineFormatException {
+    
+    public void lireFormatOneEventByLine (String nomFichierEntree) throws OneEventByLineFichierIntrouvableException, OneEventByLineFormatException {
 	Scanner scanner ;
 	try {
 	    scanner = new Scanner(new File(nomFichierEntree)) ;
+	    scanner.useDelimiter("");
 	    int numLigne = 0 ;
 	    while (scanner.hasNext()) {
-		scanner.skip("\\s*") ;
+		while (scanner.hasNext(SKIP)) {
+		    scanner.skip(SKIP);
+		    numLigne++ ;
+		}
 		String ligne = scanner.nextLine() ;
 		String donnees = new Scanner(ligne).findInLine(PATTERN_ONE_EVENT_BY_LINE) ;
 		numLigne++ ;
 		if (donnees != null) {
 		    ligneDecoupee = donnees.split(SEPARATEUR) ;
 		    System.out.println(java.util.Arrays.toString(ligneDecoupee));
+		    evenements.add(new Evenement(ligneDecoupee)) ;
 		}
 		else {
 		    scanner.close();
-		    throw new OneEventByLineFormatException(numLigne, ligne);
+		    throw new OneEventByLineFormatException(numLigne, ligne, nomFichierEntree);
 		}
 	    }
-	    //System.out.println(nomsObjets);
 	    scanner.close();
 	} catch (FileNotFoundException ex) {
-	    throw new FichierOneEventByLineIntrouvableException(nomFichierEntree);
+	    throw new OneEventByLineFichierIntrouvableException(nomFichierEntree);
 	}
     }
     
-    private void ecrireFormatCSV (String nomFichierSortie) {
+    public void ecrireFormatCSV (String nomFichierSortie) {
 	BufferedWriter bufferedWriter ;
 	try {
 	    bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie));
@@ -89,6 +95,9 @@ public class Simulateur {
 		bufferedWriter.write(nomsObjets.get(i) + Evenement.SEPARATEUR) ;
 	    }
 	    bufferedWriter.write(nomsObjets.get(i) + "\n");
+	    for (Evenement evenement : evenements) {
+		bufferedWriter.write(evenement.toString()+"\n");
+	    }
 	    bufferedWriter.close();
 	} catch (IOException ex) {
 	    System.err.println("Une erreur est apparue lors de l'écriture des traces au format CSV dans le fichier " + nomFichierSortie + ".") ;
@@ -101,16 +110,10 @@ public class Simulateur {
      */
     
     public static void main(String[] args) {
-	try {
-	    Simulateur simulateur = new Simulateur(new Configurateur()) ;
-	    //simulateur.getConfigurateur().lireObjets("ressources/fichier_config.txt");
-	    //simulateur.getConfigurateur().lireObjets("ressources/fichier_tabulaire_OneEventByLineFormatException.txt");
-	    simulateur.lireFormatOneEventByLine("ressources/fichier_tabulaire_OneEventByLineFormatException.txt");
-	    simulateur.ecrireFormatCSV("ressources/fichier_tabulaire.csv");
-	    Util.execCommande(new String[]{"cat","ressources/fichier_tabulaire.csv"});
-	} catch (FichierOneEventByLineIntrouvableException | OneEventByLineFormatException ex) {
-	    ex.terminerExecutionSimulateur();
-	}
+	Simulateur simulateur = new Simulateur(new Configurateur()) ;
+	simulateur.getConfigurateur().lireObjets("ressources/fichier_config.txt");
+	simulateur.ecrireFormatCSV("ressources/fichier_tabulaire.csv");
+	Util.execCommande(new String[]{"cat","ressources/fichier_tabulaire.csv"});
     }
     
 }
