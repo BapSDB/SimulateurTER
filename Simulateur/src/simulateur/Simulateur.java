@@ -1,58 +1,80 @@
 package simulateur;
 
 import configurateur.Configurateur;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import util.Util;
+import exceptions.FichierOneEventByLineIntrouvableException;
+import exceptions.OneEventByLineFormatException;
+import java.util.ArrayList;
 
 public class Simulateur {
     
     private final Configurateur configurateur ;
+    String [] ligneDecoupee ;
+    List<Evenement> evenements ; 
+    
+    // Définition des expressions régulières
+    // Pour l'analyse d'une ligne d'un fichier "one-event-by-line"
+    // Format attendu : timestamp ; objet ; value
+    // Lexèmes correspondants : TIMESTAMP SEPARATEUR NOM_OBJET SEPARATEUR VALEUR
+    
+    private static final String TIMESTAMP = "[0-2][0-3]:[0-5]\\d:[0-5]\\d" ;
+    private static final String SEPARATEUR = "\\s*;\\s*" ;
+    private static final String NOM_OBJET = "\\w+" ;
+    private static final String VALEUR = "\\w+" ;
+    private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
 
     public Simulateur(Configurateur configurateur) {
 	this.configurateur = configurateur;
+	ligneDecoupee = new String[3];
+	evenements = new ArrayList<>(128) ;
     }
 
     public Configurateur getConfigurateur() {
 	return configurateur;
     }
     
-    private void lireFormatOneEventByLine (String nomFichierEntree) {
+    /**
+     * Lit un fichier "one-event-by-line" et stocke ses données.<p>
+     * Format attendu par ligne : timestamp ; objet ; value
+     * @param nomFichierEntree
+     * Le chemin (absolu ou relatif) <p> + nom du fichier one-event-by-line à lire
+     * @throws FichierOneEventByLineIntrouvableException
+     * si le fichier n'existe pas.<p>
+     * @throws OneEventByLineFormatException
+     * si une ligne du fichier ne correspond pas au format attendu.<p>
+     * @since V0
+     */
+    private void lireFormatOneEventByLine (String nomFichierEntree) throws FichierOneEventByLineIntrouvableException, OneEventByLineFormatException {
 	Scanner scanner ;
 	try {
 	    scanner = new Scanner(new File(nomFichierEntree)) ;
-	    Pattern pattern = Pattern.compile("\\d\\d:\\d\\d:\\d\\d\\s*;\\s*\\w+\\s*;\\s*\\w+");
-	    String [] ligneDecoupee ;
-	    int l = 0 ;
+	    int numLigne = 0 ;
 	    while (scanner.hasNext()) {
 		scanner.skip("\\s*") ;
-		String ligne = scanner.findInLine(pattern) ;
-		l++ ;
-		if (ligne != null) {
-		    ligneDecoupee = ligne.split("\\s*;\\s*") ;
+		String ligne = scanner.nextLine() ;
+		String donnees = new Scanner(ligne).findInLine(PATTERN_ONE_EVENT_BY_LINE) ;
+		numLigne++ ;
+		if (donnees != null) {
+		    ligneDecoupee = donnees.split(SEPARATEUR) ;
 		    System.out.println(java.util.Arrays.toString(ligneDecoupee));
-		    scanner.nextLine();
 		}
 		else {
-		    System.err.println("La ligne n°" + l + " " + ligne + " ne respecte pas le format \"One-Event-By-Line\".") ;
 		    scanner.close();
-		    System.exit(2);
+		    throw new OneEventByLineFormatException(numLigne, ligne);
 		}
 	    }
 	    //System.out.println(nomsObjets);
 	    scanner.close();
 	} catch (FileNotFoundException ex) {
-	    System.err.println("Le fichier de configuration " + nomFichierEntree + " n'existe pas");
-	    System.exit(1);
+	    throw new FichierOneEventByLineIntrouvableException(nomFichierEntree);
 	}
     }
     
@@ -60,11 +82,11 @@ public class Simulateur {
 	BufferedWriter bufferedWriter ;
 	try {
 	    bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie));
-	    bufferedWriter.write("timestamp; ") ;
+	    bufferedWriter.write("timestamp"+Evenement.SEPARATEUR) ;
 	    List<String> nomsObjets = configurateur.getNomsObjets() ;
 	    int i = 0 ;
 	    for (; i < nomsObjets.size()-1; i++) {
-		bufferedWriter.write(nomsObjets.get(i) + "; ") ;
+		bufferedWriter.write(nomsObjets.get(i) + Evenement.SEPARATEUR) ;
 	    }
 	    bufferedWriter.write(nomsObjets.get(i) + "\n");
 	    bufferedWriter.close();
@@ -73,35 +95,22 @@ public class Simulateur {
 	    System.exit(3);
 	}
     }
-    
-    private void execCommande (String [] cmd) {
-	try {
-	    Process p = Runtime.getRuntime().exec(cmd);
-	    new Thread(() -> {
-		try {
-		    BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream())) ;
-		    String line ;
-		    while((line = br.readLine()) != null)
-			System.out.println(line);
-		} catch (IOException ex) {
-		    Logger.getLogger(Simulateur.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	    }).start();
-	    p.waitFor() ;
-	} catch (IOException | InterruptedException ex) {
-	    Logger.getLogger(Simulateur.class.getName()).log(Level.SEVERE, null, ex);
-	}
-    }
 
     /**
      * @param args the command line arguments
      */
+    
     public static void main(String[] args) {
-	Simulateur simulateur = new Simulateur(new Configurateur()) ;
-	simulateur.getConfigurateur().lireObjets("ressources/fichier_config.txt");
-	simulateur.ecrireFormatCSV("ressources/fichier_tabulaire.csv");
-	simulateur.execCommande(new String[]{"cat","ressources/fichier_tabulaire.csv"});
-	simulateur.lireFormatOneEventByLine("ressources/oebl.txt");
+	try {
+	    Simulateur simulateur = new Simulateur(new Configurateur()) ;
+	    //simulateur.getConfigurateur().lireObjets("ressources/fichier_config.txt");
+	    //simulateur.getConfigurateur().lireObjets("ressources/fichier_tabulaire_OneEventByLineFormatException.txt");
+	    simulateur.lireFormatOneEventByLine("ressources/fichier_tabulaire_OneEventByLineFormatException.txt");
+	    simulateur.ecrireFormatCSV("ressources/fichier_tabulaire.csv");
+	    Util.execCommande(new String[]{"cat","ressources/fichier_tabulaire.csv"});
+	} catch (FichierOneEventByLineIntrouvableException | OneEventByLineFormatException ex) {
+	    ex.terminerExecutionSimulateur();
+	}
     }
     
 }
