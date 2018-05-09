@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package configurateur;
 
 import java.io.File;
@@ -11,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- *
- * @author bleuzeb
- */
 public class Configurateur {
     
     private final List<String> nomsObjets = new ArrayList<>(128) ;

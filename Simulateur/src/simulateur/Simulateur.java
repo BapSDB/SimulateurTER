@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package simulateur;
 
 import configurateur.Configurateur;
@@ -19,10 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-/**
- *
- * @author bleuzeb
- */
 public class Simulateur {
     
     private final Configurateur configurateur ;
@@ -107,10 +98,10 @@ public class Simulateur {
      */
     public static void main(String[] args) {
 	Simulateur simulateur = new Simulateur(new Configurateur()) ;
-	simulateur.getConfigurateur().lireObjets("lol");
-	simulateur.ecrireFormatCSV("lel");
-	simulateur.execCommande(new String[]{"cat","lel"});
-	simulateur.lireFormatOneEventByLine("file.txt");
+	simulateur.getConfigurateur().lireObjets("ressources/fichier_config.txt");
+	simulateur.ecrireFormatCSV("ressources/fichier_tabulaire.csv");
+	simulateur.execCommande(new String[]{"cat","ressources/fichier_tabulaire.csv"});
+	simulateur.lireFormatOneEventByLine("ressources/oebl.txt");
     }
     
 }
