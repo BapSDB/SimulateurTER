@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
-import java.util.NavigableSet;
 import exceptions.one_event_by_line.* ;
 import exceptions.fichier_config.* ;
 import util.Util;
@@ -126,7 +125,7 @@ public class Simulateur {
 	    simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
 	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
 	} catch (
-		OneEventByLineFichierIntrouvableException | OneEventByLineFormatException | OneEventByLineEcrireFormatCSVException | OneEventByLineNomObjetIntrouvableException
+		OneEventByLineFichierIntrouvableException | OneEventByLineFormatException | OneEventByLineEcrireFormatCSVException |                       OneEventByLineNomObjetIntrouvableException
 		|ConfigNomObjetException | ConfigFichierIntrouvableException ex) {
 	    ex.terminerExecutionSimulateur();
 	}
