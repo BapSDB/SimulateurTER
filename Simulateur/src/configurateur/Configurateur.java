@@ -2,35 +2,39 @@ package configurateur;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.NavigableMap;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 public class Configurateur {
     
-    private final List<String> nomsObjets = new ArrayList<>(128) ;
+    private final NavigableMap<Integer, String> nomsObjets = new TreeMap<>(Comparator.naturalOrder());
 
-    public List<String> getNomsObjets() {
-	return nomsObjets;
+    public Configurateur(String nomFichierEntree) {
+	lireObjets(nomFichierEntree);
     }
     
-    public void lireObjets (String nomFichierEntree) {
-	Scanner scanner ;
-	try {
-	    scanner = new Scanner(new File(nomFichierEntree)) ;
+
+    public Collection<String> getNomsObjets() {
+	return nomsObjets.values() ;
+    }
+    
+    public final void lireObjets (String nomFichierEntree) {
+	int pos = 0 ;
+	try (Scanner scanner = new Scanner(new File(nomFichierEntree))) {
 	    scanner.useDelimiter("\\s*\n+");
 	    while (scanner.hasNext()) {
-		String objet = scanner.next() ;
-		if (objet.matches("\\w+"))
-		    nomsObjets.add(objet) ;
+		String nomObjet = scanner.next() ;
+		if (nomObjet.matches("\\w+"))
+		    nomsObjets.put(pos++, nomObjet) ;
 		else {
-		    System.err.println("L'objet " + "\"" + objet + "\" a un nom incorrect.") ;
+		    System.err.println("L'objet " + "\"" + nomObjet + "\" a un nom incorrect.") ;
 		    scanner.close();
 		    System.exit(2);
 		}
 	    }
-	    System.out.println(nomsObjets);
-	    scanner.close();
 	} catch (FileNotFoundException ex) {
 	    System.err.println("Le fichier de configuration " + nomFichierEntree + " n'existe pas");
 	    System.exit(1);

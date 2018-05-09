@@ -1,6 +1,7 @@
 package simulateur;
 
 import configurateur.Configurateur;
+import exceptions.one_event_by_line.OneEventByLineEcrireFormatCSVException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,10 +10,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import util.Util;
-import exceptions.OneEventByLineFichierIntrouvableException;
-import exceptions.OneEventByLineFormatException;
+import exceptions.one_event_by_line.OneEventByLineFichierIntrouvableException;
+import exceptions.one_event_by_line.OneEventByLineFormatException;
 import java.util.ArrayList;
+import java.util.Collection;
+import util.Util;
 
 public class Simulateur {
     
@@ -52,12 +54,11 @@ public class Simulateur {
      * @throws OneEventByLineFormatException
      * si une ligne du fichier ne correspond pas au format attendu.<p>
      * @since V0
+     * @see ecrireFormatCSV
      */
     
     public void lireFormatOneEventByLine (String nomFichierEntree) throws OneEventByLineFichierIntrouvableException, OneEventByLineFormatException {
-	Scanner scanner ;
-	try {
-	    scanner = new Scanner(new File(nomFichierEntree)) ;
+	try (Scanner scanner = new Scanner(new File(nomFichierEntree))) {
 	    scanner.useDelimiter("");
 	    int numLigne = 0 ;
 	    while (scanner.hasNext()) {
@@ -66,42 +67,41 @@ public class Simulateur {
 		    numLigne++ ;
 		}
 		String ligne = scanner.nextLine() ;
-		String donnees = new Scanner(ligne).findInLine(PATTERN_ONE_EVENT_BY_LINE) ;
-		numLigne++ ;
-		if (donnees != null) {
-		    ligneDecoupee = donnees.split(SEPARATEUR) ;
-		    System.out.println(java.util.Arrays.toString(ligneDecoupee));
-		    evenements.add(new Evenement(ligneDecoupee)) ;
-		}
-		else {
-		    scanner.close();
-		    throw new OneEventByLineFormatException(numLigne, ligne, nomFichierEntree);
+		try(Scanner scannerLigne = new Scanner(ligne)) {
+		    String donnees = scannerLigne.findInLine(PATTERN_ONE_EVENT_BY_LINE) ;
+		    numLigne++ ;
+		    if (donnees != null) {
+			ligneDecoupee = donnees.split(SEPARATEUR) ;
+			evenements.add(new Evenement(ligneDecoupee)) ;
+		    }
+		    else {
+			throw new OneEventByLineFormatException(numLigne, ligne, nomFichierEntree);
+		    }
 		}
 	    }
-	    scanner.close();
 	} catch (FileNotFoundException ex) {
-	    throw new OneEventByLineFichierIntrouvableException(nomFichierEntree);
+	    throw new OneEventByLineFichierIntrouvableException(ex, nomFichierEntree);
 	}
     }
     
-    public void ecrireFormatCSV (String nomFichierSortie) {
-	BufferedWriter bufferedWriter ;
-	try {
-	    bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie));
+    /**
+     * Ecrit dans un fichier au format CSV les données sous une forme tabulaire
+     * @param nomFichierSortie
+     * * Le chemin (absolu ou relatif) <p> + nom du fichier où seront écrites les données
+     * @throws OneEventByLineEcrireFormatCSVException
+     * si une erreur d'entrée/sortie est apparue lors de l'écriture
+     */
+    public void ecrireFormatCSV (String nomFichierSortie) throws OneEventByLineEcrireFormatCSVException {
+	try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie))) {
 	    bufferedWriter.write("timestamp"+Evenement.SEPARATEUR) ;
-	    List<String> nomsObjets = configurateur.getNomsObjets() ;
-	    int i = 0 ;
-	    for (; i < nomsObjets.size()-1; i++) {
-		bufferedWriter.write(nomsObjets.get(i) + Evenement.SEPARATEUR) ;
-	    }
-	    bufferedWriter.write(nomsObjets.get(i) + "\n");
-	    for (Evenement evenement : evenements) {
+	    Collection<String> nomsObjets = configurateur.getNomsObjets() ;
+	    int n = nomsObjets.size() ;
+	    for (String nomObjet : nomsObjets)
+		bufferedWriter.write(nomObjet + (--n > 0 ? Evenement.SEPARATEUR : "\n")) ;
+	    for (Evenement evenement : evenements)
 		bufferedWriter.write(evenement.toString()+"\n");
-	    }
-	    bufferedWriter.close();
 	} catch (IOException ex) {
-	    System.err.println("Une erreur est apparue lors de l'écriture des traces au format CSV dans le fichier " + nomFichierSortie + ".") ;
-	    System.exit(3);
+	    throw new OneEventByLineEcrireFormatCSVException(ex, nomFichierSortie) ;
 	}
     }
 
@@ -110,10 +110,13 @@ public class Simulateur {
      */
     
     public static void main(String[] args) {
-	Simulateur simulateur = new Simulateur(new Configurateur()) ;
-	simulateur.getConfigurateur().lireObjets("ressources/fichier_config.txt");
-	simulateur.ecrireFormatCSV("ressources/fichier_tabulaire.csv");
-	Util.execCommande(new String[]{"cat","ressources/fichier_tabulaire.csv"});
+	try {
+	    Simulateur simulateur = new Simulateur(new Configurateur("ressources/fichier_config.txt")) ;
+	    simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
+	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
+	} catch (OneEventByLineEcrireFormatCSVException ex) {
+	    ex.terminerExecutionSimulateur();
+	}
     }
     
 }
