@@ -15,7 +15,7 @@ public class Evenement {
     private final String nomObjet ;
     private final String valeur ;
     
-    private static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("hh:mm:ss");
+    private static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
     public Evenement(String [] ligneDecoupee) {
 	try {

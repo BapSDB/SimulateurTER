@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package one_event_by_line;
 
 import configurateur.Configurateur;
@@ -30,7 +26,7 @@ public class OneEventByLineJUnitTest {
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
     
-    public OneEventByLineJUnitTest() throws FichierIntrouvableException, LireDonneesException {
+    public OneEventByLineJUnitTest() throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
 	configurateur = new Configurateur("test/fichier_config/ressources/fichier_config.txt") ;
     }
     
