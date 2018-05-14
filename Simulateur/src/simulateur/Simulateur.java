@@ -150,7 +150,6 @@ public class Simulateur {
 	} catch (SimulateurException ex) {
 	    ex.terminerExecutionSimulateur();
 	}
-	
     }
     
 }
