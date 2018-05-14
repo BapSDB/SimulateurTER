@@ -1,40 +1,52 @@
 package configurateur;
 
+import exceptions.EntreeSortieException;
+import exceptions.FichierIntrouvableException;
+import exceptions.LireDonneesException;
 import exceptions.fichier_config.ConfigFichierIntrouvableException;
 import exceptions.fichier_config.ConfigNomObjetException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
+import exceptions.fichier_config.ConfigTraiterFichierExceptions;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
+import util.Util;
+import util.Util.AjouterElement;
 
 public class Configurateur {
     
-    private final Set<String> nomsObjets = new HashSet<>();
-    private final List<String> posNomsObjets = new ArrayList() ;
-    private static final Pattern SKIP = Pattern.compile("[^\\S\\n]*\\n") ;
+    private final Set<String> nomsObjets = new LinkedHashSet<>();
+    private final AjouterElement ajouterElement ;
 
-    public Configurateur(String nomFichierEntree) throws ConfigNomObjetException, ConfigFichierIntrouvableException {
+    public Configurateur(String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
+	
+	ajouterElement = (String donnees, int numLigne) -> {
+	    if (donnees != null) {
+		nomsObjets.add(donnees);
+	    } else {
+		throw new ConfigNomObjetException(donnees, numLigne, nomFichierEntree) ;
+	    }
+	};
+	
 	lireObjets(nomFichierEntree);
     }
 
-    public List<String> getNomsObjets() {
-	return posNomsObjets ;
+    public Set<String> getNomsObjets() {
+	return nomsObjets ;
     }
     
     /**
      * Lit un fichier de configuration listant les objets utilisés dans la simulation
-     * 
      * @param nomFichierEntree
-     * Le chemin (absolu ou relatif) <p> + nom du fichier de configuration à lire
+     * Le chemin (absolu ou relatif) <p> + nom du fichier de configuration à lire.
      * @throws ConfigNomObjetException
      * @throws ConfigFichierIntrouvableException
      */
-    public final void lireObjets (String nomFichierEntree) throws ConfigNomObjetException, ConfigFichierIntrouvableException {
-	int pos = 0 ;
+    
+    public final void lireObjets (String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
+	Util.lireDonnees(nomFichierEntree, Pattern.compile("\\w+"), ajouterElement, new ConfigTraiterFichierExceptions(nomFichierEntree));
+    }
+    
+    /*public final void lireObjets (String nomFichierEntree) throws ConfigNomObjetException, ConfigFichierIntrouvableException {
 	try (Scanner scanner = new Scanner(new File(nomFichierEntree))) {
 	    scanner.useDelimiter("");
 	    int numLigne = 0 ;
@@ -49,7 +61,6 @@ public class Configurateur {
 			String nomObjet = scannerLigne.findInLine("\\w+") ;
 			numLigne++ ;
 			if (nomObjet != null) {
-			    posNomsObjets.add(nomObjet);
 			    nomsObjets.add(nomObjet);
 			} else {
 			    throw new ConfigNomObjetException(nomObjet, numLigne, nomFichierEntree) ;
@@ -60,5 +71,5 @@ public class Configurateur {
 	} catch (FileNotFoundException ex) {
 	    throw new ConfigFichierIntrouvableException(ex, nomFichierEntree);
 	}
-    }
+    }*/
 }

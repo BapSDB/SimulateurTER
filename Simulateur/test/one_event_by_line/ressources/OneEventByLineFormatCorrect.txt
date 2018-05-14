@@ -1,7 +1,2 @@
-
-
 12:50:10   ;   Objet1;    Value1     
-
-
       12:12:12;Objet2;Value2    
-
