@@ -137,20 +137,18 @@ public class Simulateur {
 	}
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    
-    public static void main(String[] args) {
-	try {
-	    Simulateur simulateur = new Simulateur("test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt", new Configurateur("ressources/fichier_config.txt")) ;
-	    simulateur.lireFormatOneEventByLine();
-	    simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
-	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
-	} catch (SimulateurException ex) {
-	    ex.terminerExecutionSimulateur();
-	}
-	
+  /**
+   * @param args the command line arguments
+   */
+
+  public static void main(String[] args) {
+    try {
+        Simulateur simulateur = new Simulateur("test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt", new Configurateur("ressources/fichier_config.txt")) ;
+        simulateur.lireFormatOneEventByLine();
+        simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
+        Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
+    } catch (SimulateurException ex) {
+        ex.terminerExecutionSimulateur();
     }
     
 }
