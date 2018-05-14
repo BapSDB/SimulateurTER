@@ -11,14 +11,6 @@ public abstract class SimulateurException extends Exception {
 	super(message);
     }
     
-    public SimulateurException(Throwable cause) {
-	super(cause);
-    }
-
-    public SimulateurException(String message, Throwable cause) {
-	super(message, cause);
-    }
-    
     public void terminerExecutionSimulateur () {
 	System.err.println(getMessage());
 	System.exit(codeErreur);

@@ -1,12 +1,11 @@
 package exceptions.one_event_by_line;
 
-import exceptions.SimulateurException;
-import java.io.FileNotFoundException;
+import exceptions.FichierIntrouvableException;
 
-public class OneEventByLineFichierIntrouvableException extends SimulateurException {
+public class OneEventByLineFichierIntrouvableException extends FichierIntrouvableException {
 
-    public OneEventByLineFichierIntrouvableException(FileNotFoundException ex, String nomFichierEntree) {
-	super("\"Le fichier \"one-event-by-line\" \"" + nomFichierEntree + "\" n'existe pas\"", ex);
+    public OneEventByLineFichierIntrouvableException(String nomFichierEntree) {
+	super("\"Le fichier \"one-event-by-line\" \"" + nomFichierEntree + "\" n'existe pas\"");
 	codeErreur = 1 ;
     }
     
