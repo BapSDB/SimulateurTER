@@ -1,16 +1,20 @@
 
 package util;
 
-import exceptions.SimulateurException;
+import exceptions.TimeStampException;
+import exceptions.timestamp.TimeStampDateException;
+import exceptions.timestamp.TimeStampParseException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TimeStamp {
     
+    public static final String FORMAT_UNSIGNED_LONG_LONG = "\\d+" ;
     public static final String FORMAT_HEURE = "(([01]\\d)|(2[0-3])):[0-5]\\d:[0-5]\\d" ;
     public static final String FORMAT_DATE = "\\d{4}-\\d{2}-\\d{2}" ;
     public static final String FORMAT_DATE_HEURE = FORMAT_DATE + "_" + FORMAT_HEURE ;
+    public static final int LONGUEUR_FORMAT_DATE_HEURE = "yyyy-MM-jj_HH:mm:ss".length() ;
     
     private static boolean verifierMoisLong (String [] date) {
 	boolean moisLong = false ;
@@ -55,10 +59,26 @@ public class TimeStamp {
 		&& !verifierAnneeBissextile(annee) || jour == 29 && verifierAnneeBissextile(annee)) ;
     }
     
-    public static boolean verifierDate (String [] date) throws ParseException {
+    private static boolean verifierDate (String [] date) throws ParseException {
 	    return
 		    new SimpleDateFormat("yyyy").parse(date[0]).before(new Date(System.currentTimeMillis()))
 		    && (verifierMoisLong(date) || verifierMoisCourt(date) || verifierMoisFevier(date)) ;
+    }
+    
+    public static void verifierDate (long date, String nomFichierEntree, int numLigne) throws TimeStampException {
+	if(!new Date(date).before(new Date(System.currentTimeMillis())))
+		    throw new TimeStampDateException(nomFichierEntree, String.valueOf(date), numLigne);
+    }
+    
+    public static void verifierDate (String [] evenements, String nomFichierEntree, int numLigne) throws TimeStampException {
+	try {
+	    String [] date = evenements[0].split("-") ;
+	    date[2] = date[2].substring(0, 2) ;
+	    if(!TimeStamp.verifierDate(date))
+		    throw new TimeStampDateException(nomFichierEntree, evenements[0], numLigne);
+	} catch (ParseException ex) {
+	    throw new TimeStampParseException(nomFichierEntree, evenements[0], numLigne, ex.getErrorOffset());
+	}
     }
     
     /*public static void main(String[] args) {
@@ -68,15 +88,5 @@ public class TimeStamp {
 	    Logger.getLogger(TimeStamp.class.getName()).log(Level.SEVERE, null, ex);
 	}
     }*/
-    
-}
-
-
-class TimeStampParseException extends SimulateurException {
-    
-    public TimeStampParseException(String nomFichierEntree, String timeStamp, int numLigne, int errorOffset) {
-        super(String.valueOf(errorOffset));
-	codeErreur = 12 ;
-    }
     
 }

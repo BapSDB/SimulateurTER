@@ -56,31 +56,4 @@ public final class Configurateur {
 	Util.lireDonnees(nomFichierEntree, Pattern.compile("\\w+"), ajouterElement, new ConfigTraiterFichierExceptions(nomFichierEntree));
     }
     
-    /*public final void lireObjets (String nomFichierEntree) throws ConfigNomObjetException, ConfigFichierIntrouvableException {
-	try (Scanner scanner = new Scanner(new File(nomFichierEntree))) {
-	    scanner.useDelimiter("");
-	    int numLigne = 0 ;
-	    while (scanner.hasNext()) {
-		while (scanner.hasNext(SKIP)) {
-		    scanner.skip(SKIP);
-		    numLigne++ ;
-		}
-		if (scanner.hasNext()) {
-		    String ligne = scanner.nextLine() ;
-		    try(Scanner scannerLigne = new Scanner(ligne)) {
-			String nomObjet = scannerLigne.findInLine("\\w+") ;
-			numLigne++ ;
-			if (nomObjet != null) {
-			    nomsObjets.add(nomObjet);
-			} else {
-			    throw new ConfigNomObjetException(nomObjet, numLigne, nomFichierEntree) ;
-			}
-		    }
-		}
-	    }
-	} catch (FileNotFoundException ex) {
-	    throw new ConfigFichierIntrouvableException(ex, nomFichierEntree);
-	}
-    }*/
-    
 }

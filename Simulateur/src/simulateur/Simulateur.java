@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import traducteur.TraducteurSwitch2;
+import util.StringUtil;
 import util.TimeStamp;
 import util.Util;
 import util.Util.AjouterElement;
@@ -37,13 +39,13 @@ public final class Simulateur {
     // TIMESTAMP : HH:mm:ss
     // SEPARATEUR : ";" par défaut pouvant être entouré par des blancs
     // NOM_OBJET : une chaîne de caractères alphanumériques commençant par une lettre
-    // VALEUR : une chaîne de caractères alphanumériques commençant par une lettre
+    // VALEUR : une chaîne de caractères alphanumériques
     
-    private static final String TIMESTAMP = TimeStamp.FORMAT_HEURE ;
+    private static final String TIMESTAMP = TimeStamp.FORMAT_DATE_HEURE ;
     private static final String BLANCS = "[^\\S\\n]*" ;
     private static final String SEPARATEUR = BLANCS + ";" + BLANCS ;
     private static final String NOM_OBJET = "[A-Za-z]\\w*" ;
-    private static final String VALEUR = "[A-Za-z]\\w*" ;
+    private static final String VALEUR = "\\w+" ;
     private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
     
     public Simulateur(Configurateur configurateur, String nomFichierEntreeOEBL) {
@@ -70,7 +72,7 @@ public final class Simulateur {
 	
 	evenement = new String[3] ;
 	padding = new int [configurateur.getNomsObjets().size()+1] ;
-	padding[0] = "timestamp".length() ;
+	padding[0] = Math.max("timestamp".length(), TimeStamp.LONGUEUR_FORMAT_DATE_HEURE) ;
 	Iterator<String> it = configurateur.getNomsObjets().iterator() ;
 	for (int i = 1 ; it.hasNext() ; i++)
 	    padding[i] = it.next().length() ;
@@ -113,16 +115,16 @@ public final class Simulateur {
     public void ecrireFormatCSV (String nomFichierSortie) throws OneEventByLineEcrireFormatCSVException {
 	System.out.println(Arrays.toString(padding));
 	try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie))) {
-	    bufferedWriter.write(String.format("%-" + padding[0] + "s", "timestamp")+Util.SEPARATEUR) ;
+	    bufferedWriter.write(StringUtil.centrer("timestamp", padding[0]) + Util.SEPARATEUR) ;
 	    Set<String> nomsObjets = configurateur.getNomsObjets() ;
 	    int n = 0 ;
 	    for (String nomObjet : nomsObjets)
-		bufferedWriter.write(String.format("%-" + padding[n+1] + "s", nomObjet) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
+		bufferedWriter.write(StringUtil.centrer(nomObjet, padding[n+1]) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
 	    for (Entry<String, String[]> entrySet : tableau.entrySet()) {
                 n = 0 ;
-                bufferedWriter.write(String.format("%-" + padding[0] + "s", entrySet.getKey())+Util.SEPARATEUR);
+                bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), padding[0]) + Util.SEPARATEUR);
                 for (String valeur : entrySet.getValue())
-                    bufferedWriter.write(String.format("%-" + padding[n+1] + "s", valeur != null ? valeur : "") + (++n < entrySet.getValue().length ? Util.SEPARATEUR : "\n"));
+                    bufferedWriter.write(StringUtil.centrer(valeur != null ? valeur : "", padding[n+1]) + (++n < entrySet.getValue().length ? Util.SEPARATEUR : "\n"));
             }
 	} catch (IOException ex) {
 	    throw new OneEventByLineEcrireFormatCSVException(nomFichierSortie) ;
@@ -135,10 +137,16 @@ public final class Simulateur {
     
     public static void main(String[] args) {
 	try {
-	    Simulateur simulateur = new Simulateur(new Configurateur("src/ressources/fichier_config.txt"), "test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt") ;
+	    /*Simulateur simulateur = new Simulateur(new Configurateur("src/ressources/fichier_config.txt"), "test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt") ;
 	    simulateur.lireFormatOneEventByLine();
 	    simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
-	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
+	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});*/
+	    /*new TraducteurSwitch2("src/ressources/Switch2.switch").traduireFormatOriginalVersFormatOEBL();
+	    Util.execCommande(new String[]{"cat","src/ressources/Switch2.oebl"});*/
+	    Simulateur simulateur = new Simulateur(new Configurateur("src/ressources/Switch2.config"), "src/ressources/Switch2.oebl") ;
+	    simulateur.lireFormatOneEventByLine();
+	    simulateur.ecrireFormatCSV("src/ressources/Switch2.csv");
+	    Util.execCommande(new String[]{"cat","src/ressources/Switch2.csv"});
 	} catch (SimulateurException ex) {
 	    ex.terminerExecutionSimulateur();
 	}

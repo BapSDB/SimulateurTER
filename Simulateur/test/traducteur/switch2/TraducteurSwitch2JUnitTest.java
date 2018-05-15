@@ -7,6 +7,7 @@ package traducteur.switch2;
 
 import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
+import exceptions.TimeStampException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -50,7 +51,7 @@ public class TraducteurSwitch2JUnitTest {
     // public void hello() {}
     
     @Test
-    public void traduireFichierOriginalVersFichierOEBLCorrect () throws FichierIntrouvableException, EntreeSortieException {
+    public void traduireFichierOriginalVersFichierOEBLCorrect () throws FichierIntrouvableException, EntreeSortieException, TimeStampException {
 	traducteurSwitch2 = new TraducteurSwitch2("src/ressources/Switch2.switch") ;
 	traducteurSwitch2.traduireFormatOriginalVersFormatOEBL();
 	Util.execCommande(new String[]{"cat", traducteurSwitch2.getNomFichierOEBL()});
