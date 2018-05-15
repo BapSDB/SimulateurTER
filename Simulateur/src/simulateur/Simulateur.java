@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import util.TimeStamp;
 import util.Util;
 import util.Util.AjouterElement;
 
@@ -38,7 +39,7 @@ public final class Simulateur {
     // NOM_OBJET : une chaîne de caractères alphanumériques commençant par une lettre
     // VALEUR : une chaîne de caractères alphanumériques commençant par une lettre
     
-    private static final String TIMESTAMP = "[0-2][0-3]:[0-5]\\d:[0-5]\\d" ;
+    private static final String TIMESTAMP = TimeStamp.FORMAT_HEURE ;
     private static final String BLANCS = "[^\\S\\n]*" ;
     private static final String SEPARATEUR = BLANCS + ";" + BLANCS ;
     private static final String NOM_OBJET = "[A-Za-z]\\w*" ;
@@ -112,16 +113,16 @@ public final class Simulateur {
     public void ecrireFormatCSV (String nomFichierSortie) throws OneEventByLineEcrireFormatCSVException {
 	System.out.println(Arrays.toString(padding));
 	try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie))) {
-	    bufferedWriter.write(String.format("%-" + padding[0] + "s", "timestamp")+Evenement.SEPARATEUR) ;
+	    bufferedWriter.write(String.format("%-" + padding[0] + "s", "timestamp")+Util.SEPARATEUR) ;
 	    Set<String> nomsObjets = configurateur.getNomsObjets() ;
 	    int n = 0 ;
 	    for (String nomObjet : nomsObjets)
-		bufferedWriter.write(String.format("%-" + padding[n+1] + "s", nomObjet) + (++n < nomsObjets.size() ? Evenement.SEPARATEUR : "\n")) ;
+		bufferedWriter.write(String.format("%-" + padding[n+1] + "s", nomObjet) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
 	    for (Entry<String, String[]> entrySet : tableau.entrySet()) {
                 n = 0 ;
-                bufferedWriter.write(String.format("%-" + padding[0] + "s", entrySet.getKey())+Evenement.SEPARATEUR);
+                bufferedWriter.write(String.format("%-" + padding[0] + "s", entrySet.getKey())+Util.SEPARATEUR);
                 for (String valeur : entrySet.getValue())
-                    bufferedWriter.write(String.format("%-" + padding[n+1] + "s", valeur != null ? valeur : "") + (++n < entrySet.getValue().length ? Evenement.SEPARATEUR : "\n"));
+                    bufferedWriter.write(String.format("%-" + padding[n+1] + "s", valeur != null ? valeur : "") + (++n < entrySet.getValue().length ? Util.SEPARATEUR : "\n"));
             }
 	} catch (IOException ex) {
 	    throw new OneEventByLineEcrireFormatCSVException(nomFichierSortie) ;

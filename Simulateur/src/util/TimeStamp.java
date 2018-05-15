@@ -1,0 +1,82 @@
+
+package util;
+
+import exceptions.SimulateurException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class TimeStamp {
+    
+    public static final String FORMAT_HEURE = "(([01]\\d)|(2[0-3])):[0-5]\\d:[0-5]\\d" ;
+    public static final String FORMAT_DATE = "\\d{4}-\\d{2}-\\d{2}" ;
+    public static final String FORMAT_DATE_HEURE = FORMAT_DATE + "_" + FORMAT_HEURE ;
+    
+    private static boolean verifierMoisLong (String [] date) {
+	boolean moisLong = false ;
+	
+	switch(date[1]) {
+	    case "01" : 
+	    case "03" : 
+	    case "05" :
+	    case "07" :
+	    case "08" :
+	    case "10" :
+	    case "12" :
+		moisLong = true ;
+	}
+	
+	return moisLong && date[2].compareTo("31") <= 0 ;
+    }
+    
+    private static boolean verifierMoisCourt (String [] date) {
+	boolean moisCourt = false ;
+	
+	switch(date[1]) {
+	    case "04" : 
+	    case "06" :
+	    case "09" :
+	    case "11" :
+		moisCourt = true ;
+	}
+	
+	return moisCourt && date[2].compareTo("30") <= 0 ;
+    }
+    
+    private static boolean verifierAnneeBissextile (int annee) {
+	return annee % 4 == 0 && annee % 100 != 0 || annee % 4 == 0 && annee % 400 == 0 ;
+    }
+    
+    private static boolean verifierMoisFevier (String [] date) {
+	boolean moisFevrier = date[1].equals("02") ;
+	int jour = Integer.parseUnsignedInt(date[2]) ;
+	int annee = Integer.parseUnsignedInt(date[0]) ;
+	return moisFevrier && (jour < 29
+		&& !verifierAnneeBissextile(annee) || jour == 29 && verifierAnneeBissextile(annee)) ;
+    }
+    
+    public static boolean verifierDate (String [] date) throws ParseException {
+	    return
+		    new SimpleDateFormat("yyyy").parse(date[0]).before(new Date(System.currentTimeMillis()))
+		    && (verifierMoisLong(date) || verifierMoisCourt(date) || verifierMoisFevier(date)) ;
+    }
+    
+    /*public static void main(String[] args) {
+	try {
+	    System.out.println(verifierDate(new String[]{"2003", "04", "99"})) ;
+	} catch (ParseException ex) {
+	    Logger.getLogger(TimeStamp.class.getName()).log(Level.SEVERE, null, ex);
+	}
+    }*/
+    
+}
+
+
+class TimeStampParseException extends SimulateurException {
+    
+    public TimeStampParseException(String nomFichierEntree, String timeStamp, int numLigne, int errorOffset) {
+        super(String.valueOf(errorOffset));
+	codeErreur = 12 ;
+    }
+    
+}
