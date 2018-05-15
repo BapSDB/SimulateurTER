@@ -20,7 +20,7 @@ public class Util {
     
     @FunctionalInterface
     public static interface AjouterElement {
-	public void ajouter (String donnees, int numLigne) throws LireDonneesException ;
+	public void ajouter (String ligne, String donnees, int numLigne) throws LireDonneesException ;
     }
     
     public static void lireDonnees (String nomFichierEntree, Pattern pattern, AjouterElement ajouterElement, TraiterFichierExceptions traiterFichierExceptions)
@@ -29,8 +29,7 @@ public class Util {
 	try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(nomFichierEntree))) {
 	    while ((ligne = lineNumberReader.readLine()) != null) {
 		try(Scanner scannerLigne = new Scanner(ligne)) {
-		    String donnees = scannerLigne.findInLine(pattern) ;
-		    ajouterElement.ajouter(donnees, lineNumberReader.getLineNumber());
+		    ajouterElement.ajouter(ligne, scannerLigne.findInLine(pattern), lineNumberReader.getLineNumber());
 		}
 	    }
 	} catch (FileNotFoundException ex) {

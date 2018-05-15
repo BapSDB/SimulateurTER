@@ -5,6 +5,7 @@ import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
 import exceptions.fichier_config.ConfigFichierIntrouvableException;
 import exceptions.fichier_config.ConfigNomObjetException;
+import exceptions.fichier_config.ConfigNomObjetNonUniqueException;
 import exceptions.fichier_config.ConfigTraiterFichierExceptions;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -12,18 +13,22 @@ import java.util.regex.Pattern;
 import util.Util;
 import util.Util.AjouterElement;
 
-public class Configurateur {
+public final class Configurateur {
     
-    private final Set<String> nomsObjets = new LinkedHashSet<>();
+    private Set<String> nomsObjets = new LinkedHashSet<>();
     private final AjouterElement ajouterElement ;
 
     public Configurateur(String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
 	
-	ajouterElement = (String donnees, int numLigne) -> {
+	ajouterElement = (String ligne, String donnees, int numLigne) -> {
 	    if (donnees != null) {
-		nomsObjets.add(donnees);
+                if (!nomsObjets.contains(donnees)) {
+                    nomsObjets.add(donnees);
+                } else {
+                    throw new ConfigNomObjetNonUniqueException(ligne, numLigne, nomFichierEntree) ;
+                }
 	    } else {
-		throw new ConfigNomObjetException(donnees, numLigne, nomFichierEntree) ;
+		throw new ConfigNomObjetException(ligne, numLigne, nomFichierEntree) ;
 	    }
 	};
 	
@@ -42,7 +47,7 @@ public class Configurateur {
      * @throws ConfigFichierIntrouvableException
      */
     
-    public final void lireObjets (String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
+    public void lireObjets (String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
 	Util.lireDonnees(nomFichierEntree, Pattern.compile("\\w+"), ajouterElement, new ConfigTraiterFichierExceptions(nomFichierEntree));
     }
     
@@ -72,4 +77,5 @@ public class Configurateur {
 	    throw new ConfigFichierIntrouvableException(ex, nomFichierEntree);
 	}
     }*/
+    
 }

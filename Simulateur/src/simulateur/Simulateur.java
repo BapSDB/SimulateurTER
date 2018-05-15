@@ -13,48 +13,71 @@ import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.Set;
 import exceptions.one_event_by_line.* ;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import util.Util;
 import util.Util.AjouterElement;
 
-public class Simulateur {
+public final class Simulateur {
     
+    private static final int NB_EVENEMENTS = 2 << 16 ;
     private final Configurateur configurateur ;
     private final AjouterElement ajouterElement ;
     private final String nomFichierEntreeOEBL ;
     private String [] ligneDecoupee ;
     private List<Evenement> evenements ;
+    private Map<String, List<String>> tableau ;
     
     // Définition des expressions régulières
     // Pour l'analyse d'une ligne d'un fichier "one-event-by-line"
     // Format attendu : timestamp ; objet ; value
     // Lexèmes correspondants : TIMESTAMP SEPARATEUR NOM_OBJET SEPARATEUR VALEUR
+    // TIMESTAMP : HH:mm:ss
+    // SEPARATEUR : ";" par défaut pouvant être entouré par des blancs
+    // NOM_OBJET : une chaîne de caractères alphanumériques commençant par une lettre
+    // VALEUR : une chaîne de caractères alphanumériques commençant par une lettre
     
     private static final String TIMESTAMP = "[0-2][0-3]:[0-5]\\d:[0-5]\\d" ;
-    private static final String SEPARATEUR = "\\s*;\\s*" ;
-    private static final String NOM_OBJET = "\\w+" ;
-    private static final String VALEUR = "\\w+" ;
+    private static final String BLANCS = "[^\\S\\n]*" ;
+    private static final String SEPARATEUR = BLANCS + ";" + BLANCS ;
+    private static final String NOM_OBJET = "[A-Za-z]\\w*" ;
+    private static final String VALEUR = "[A-Za-z]\\w*" ;
     private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
     
-    public Simulateur(String nomFichierEntreeOEBL, Configurateur configurateur) {
+    public Simulateur(Configurateur configurateur, String nomFichierEntreeOEBL) {
 	
 	this.configurateur = configurateur;
-	this.nomFichierEntreeOEBL = nomFichierEntreeOEBL;
-	
-	ajouterElement = (String donnees, int numLigne) -> {
+	this.nomFichierEntreeOEBL = nomFichierEntreeOEBL ;
+        
+	ajouterElement = (String ligne, String donnees, int numLigne) -> {
 	    if (donnees != null) {
 		ligneDecoupee = donnees.split(SEPARATEUR) ;
-		if (configurateur.getNomsObjets().contains(ligneDecoupee[1]))
-		    evenements.add(new Evenement(ligneDecoupee)) ;
+		if (configurateur.getNomsObjets().contains(ligneDecoupee[1])) {
+                    try {
+                        evenements.add(new Evenement(ligneDecoupee)) ;
+                        tableau.get(ligneDecoupee[0]).add(evenements.get(evenements.size()-1).getValeur());
+                    } catch (TimeStampParseException ex) {
+                        Logger.getLogger(Simulateur.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
 		else
 		    throw new OneEventByLineNomObjetIntrouvableException(ligneDecoupee[1], numLigne, nomFichierEntreeOEBL);
 	    }
 	    else {
-		throw new OneEventByLineFormatException(donnees, numLigne, nomFichierEntreeOEBL);
+		throw new OneEventByLineFormatException(ligne, numLigne, nomFichierEntreeOEBL);
 	    }
 	};
 	
 	ligneDecoupee = new String[3];
-	evenements = new ArrayList<>(128) ;
+	evenements = new ArrayList<>(NB_EVENEMENTS) ;
+        tableau = new LinkedHashMap<>(this.configurateur.getNomsObjets().size()) ;
+        this.configurateur.getNomsObjets().forEach((nomObjet) -> {
+            tableau.put(nomObjet, new LinkedList<>());
+        });
     }
     
     public Configurateur getConfigurateur() {
@@ -80,49 +103,16 @@ public class Simulateur {
 	Util.lireDonnees(nomFichierEntreeOEBL, PATTERN_ONE_EVENT_BY_LINE, ajouterElement, new OneEventByLineTraiterFichierExceptions(nomFichierEntreeOEBL));
     }
     
-    /*public void lireFormatOneEventByLine (String nomFichierEntree) throws OneEventByLineFichierIntrouvableException, OneEventByLineFormatException, OneEventByLineNomObjetIntrouvableException {
-	Set<String> nomsObjets = configurateur.getNomsObjets() ;
-	try (Scanner scanner = new Scanner(new File(nomFichierEntree))) {
-	    scanner.useDelimiter("");
-	    int numLigne = 0 ;
-	    while (scanner.hasNext()) {
-		while (scanner.hasNext(SKIP)) {
-		    scanner.skip(SKIP);
-		    numLigne++ ;
-		}
-		if (scanner.hasNext()) {
-		    String ligne = scanner.nextLine() ;
-		    try(Scanner scannerLigne = new Scanner(ligne)) {
-			String donnees = scannerLigne.findInLine(PATTERN_ONE_EVENT_BY_LINE) ;
-			numLigne++ ;
-			if (donnees != null) {
-			    ligneDecoupee = donnees.split(SEPARATEUR) ;
-			    
-			    if (nomsObjets.contains(ligneDecoupee[1]))
-				evenements.add(new Evenement(ligneDecoupee)) ;
-			    else
-				throw new OneEventByLineNomObjetIntrouvableException(ligneDecoupee[1], numLigne, nomFichierEntree);
-			}
-			else {
-			    throw new OneEventByLineFormatException(numLigne, ligne, nomFichierEntree);
-			}
-		    }
-		}
-	    }
-	} catch (FileNotFoundException ex) {
-	    throw new OneEventByLineFichierIntrouvableException(ex, nomFichierEntree);
-	}
-    }*/
-    
     /**
      * Ecrit dans un fichier au format CSV les données sous une forme tabulaire
      * @param nomFichierSortie
      * * Le chemin (absolu ou relatif) <p> + nom du fichier où seront écrites les données
      * @throws OneEventByLineEcrireFormatCSVException
-     * si une erreur d'entrée/sortie est apparue lors de l'écriture
-     * @since V0
+     * si une erreur est apparue lors de l'écriture du fichier
+     * @since V1
      * @see lireFormatOneEventByLine
      */
+    
     public void ecrireFormatCSV (String nomFichierSortie) throws OneEventByLineEcrireFormatCSVException {
 	try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie))) {
 	    bufferedWriter.write("timestamp"+Evenement.SEPARATEUR) ;
@@ -130,8 +120,12 @@ public class Simulateur {
 	    int n = nomsObjets.size() ;
 	    for (String nomObjet : nomsObjets)
 		bufferedWriter.write(nomObjet + (--n > 0 ? Evenement.SEPARATEUR : "\n")) ;
-	    for (Evenement evenement : evenements)
-		bufferedWriter.write(evenement.toString()+"\n");
+	    for (Entry<String, List<String>> entrySet : tableau.entrySet()) {
+                n = entrySet.getValue().size() ;
+                bufferedWriter.write(entrySet.getKey()+Evenement.SEPARATEUR);
+                for (String valeur : entrySet.getValue())
+                    bufferedWriter.write(valeur + (--n > 0 ? Evenement.SEPARATEUR : "\n"));
+            }
 	} catch (IOException ex) {
 	    throw new OneEventByLineEcrireFormatCSVException(nomFichierSortie) ;
 	}
@@ -143,7 +137,7 @@ public class Simulateur {
     
     public static void main(String[] args) {
 	try {
-	    Simulateur simulateur = new Simulateur("test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt", new Configurateur("ressources/fichier_config.txt")) ;
+	    Simulateur simulateur = new Simulateur(new Configurateur("src/ressources/fichier_config.txt"), "test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt") ;
 	    simulateur.lireFormatOneEventByLine();
 	    simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
 	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});

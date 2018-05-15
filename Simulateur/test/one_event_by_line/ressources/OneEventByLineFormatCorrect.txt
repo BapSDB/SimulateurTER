@@ -1,2 +1,6 @@
 12:50:10   ;   Objet1;    Value1     
       12:12:12;Objet2;Value2    
+  23:59:59 ; Objet3 ; Value3
+12:50:11   ;   Objet1;    Value4     
+      12:12:13;Objet2;Value5    
+  00:00:00 ; Objet3 ; Value6

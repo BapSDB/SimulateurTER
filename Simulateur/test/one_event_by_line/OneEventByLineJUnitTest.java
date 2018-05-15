@@ -54,19 +54,19 @@ public class OneEventByLineJUnitTest {
     
     @Test
     public void lireFormatOneEventByLineFormatCorrect () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	new Simulateur("test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt", configurateur).lireFormatOneEventByLine(); ;
+	new Simulateur(configurateur, "test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt").lireFormatOneEventByLine();
 	Util.execCommande(new String[]{"cat", "cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
     }
     
     @Test(expected = OneEventByLineFichierIntrouvableException.class)
     public void lireFormatOneEventByLineFichierIntrouvableException () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	new Simulateur("test/one_event_by_line/ressources/OneEventByLineFichierIntrouvableException.txt", configurateur).lireFormatOneEventByLine(); ;
+	new Simulateur(configurateur, "test/one_event_by_line/ressources/OneEventByLineFichierIntrouvableException.txt").lireFormatOneEventByLine();
 	Util.execCommande(new String[]{"cat", "cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
     }
     
     @Test(expected = OneEventByLineFormatException.class)
     public void lireFormatOneEventByLineFormaException () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	new Simulateur("test/one_event_by_line/ressources/OneEventByLineFormatException.txt", configurateur).lireFormatOneEventByLine(); ;
+	new Simulateur(configurateur, "test/one_event_by_line/ressources/OneEventByLineFormatException.txt").lireFormatOneEventByLine();
 	Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
     }
     
