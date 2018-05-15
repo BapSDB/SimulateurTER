@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import traducteur.TraducteurMQTT;
 import traducteur.TraducteurSwitch2;
 import util.StringUtil;
 import util.TimeStamp;
@@ -41,11 +42,11 @@ public final class Simulateur {
     // NOM_OBJET : une chaîne de caractères alphanumériques commençant par une lettre
     // VALEUR : une chaîne de caractères alphanumériques
     
-    private static final String TIMESTAMP = TimeStamp.FORMAT_DATE_HEURE ;
+    private static final String TIMESTAMP = TimeStamp.FORMAT_UNSIGNED_LONG_LONG ;
     private static final String BLANCS = "[^\\S\\n]*" ;
     private static final String SEPARATEUR = BLANCS + ";" + BLANCS ;
     private static final String NOM_OBJET = "[A-Za-z]\\w*" ;
-    private static final String VALEUR = "\\w+" ;
+    private static final String VALEUR = "[\\w\\.]+" ;
     private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
     
     public Simulateur(Configurateur configurateur, String nomFichierEntreeOEBL) {
@@ -141,12 +142,12 @@ public final class Simulateur {
 	    simulateur.lireFormatOneEventByLine();
 	    simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
 	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});*/
-	    /*new TraducteurSwitch2("src/ressources/Switch2.switch").traduireFormatOriginalVersFormatOEBL();
-	    Util.execCommande(new String[]{"cat","src/ressources/Switch2.oebl"});*/
-	    Simulateur simulateur = new Simulateur(new Configurateur("src/ressources/Switch2.config"), "src/ressources/Switch2.oebl") ;
+	    new TraducteurMQTT("src/ressources/MQTT a4h ___ 1440497600511.log").traduireFormatOriginalVersFormatOEBL();
+	    Util.execCommande(new String[]{"cat","src/ressources/MQTT a4h ___ 1440497600511.oebl"});
+	    Simulateur simulateur = new Simulateur(new Configurateur("src/ressources/MQTT a4h ___ 1440497600511.config"), "src/ressources/MQTT a4h ___ 1440497600511.oebl") ;
 	    simulateur.lireFormatOneEventByLine();
-	    simulateur.ecrireFormatCSV("src/ressources/Switch2.csv");
-	    Util.execCommande(new String[]{"cat","src/ressources/Switch2.csv"});
+	    simulateur.ecrireFormatCSV("src/ressources/MQTT a4h ___ 1440497600511.csv");
+	    Util.execCommande(new String[]{"cat","src/ressources/MQTT a4h ___ 1440497600511.csv"});
 	} catch (SimulateurException ex) {
 	    ex.terminerExecutionSimulateur();
 	}
