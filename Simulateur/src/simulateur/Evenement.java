@@ -1,12 +1,10 @@
 package simulateur;
 
-import java.text.ParseException;
-
 public class Evenement {
     
     static final String SEPARATEUR = " ; " ;
     
-    TimeStamp timeStamp ;
+    private final TimeStamp timeStamp ;
     private final String nomObjet ;
     private final String valeur ;
     

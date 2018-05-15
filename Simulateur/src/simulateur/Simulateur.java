@@ -8,17 +8,14 @@ import exceptions.SimulateurException;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 import java.util.regex.Pattern;
-import java.util.ArrayList;
 import java.util.Set;
 import exceptions.one_event_by_line.* ;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import util.Util;
 import util.Util.AjouterElement;
 
@@ -28,9 +25,9 @@ public final class Simulateur {
     private final Configurateur configurateur ;
     private final AjouterElement ajouterElement ;
     private final String nomFichierEntreeOEBL ;
-    private String [] ligneDecoupee ;
-    private List<Evenement> evenements ;
-    private Map<String, List<String>> tableau ;
+    private String [] evenement ;
+    private int [] padding ;
+    private Map<String, String[]> tableau ;
     
     // Définition des expressions régulières
     // Pour l'analyse d'une ligne d'un fichier "one-event-by-line"
@@ -55,29 +52,28 @@ public final class Simulateur {
         
 	ajouterElement = (String ligne, String donnees, int numLigne) -> {
 	    if (donnees != null) {
-		ligneDecoupee = donnees.split(SEPARATEUR) ;
-		if (configurateur.getNomsObjets().contains(ligneDecoupee[1])) {
-                    try {
-                        evenements.add(new Evenement(ligneDecoupee)) ;
-                        tableau.get(ligneDecoupee[0]).add(evenements.get(evenements.size()-1).getValeur());
-                    } catch (TimeStampParseException ex) {
-                        Logger.getLogger(Simulateur.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+		evenement = donnees.split(SEPARATEUR) ;
+		if (configurateur.getNomsObjets().contains(evenement[1])) {
+		    int indiceNomObjet = configurateur.getNomObjetVersIndice(evenement[1]) ;
+		    tableau.putIfAbsent(evenement[0], new String[configurateur.getNomsObjets().size()]);
+		    tableau.get(evenement[0])[indiceNomObjet] = evenement[2] ;
+		    padding[indiceNomObjet + 1] = Math.max(padding[indiceNomObjet + 1], evenement[2].length()) ;
                 }
 		else
-		    throw new OneEventByLineNomObjetIntrouvableException(ligneDecoupee[1], numLigne, nomFichierEntreeOEBL);
+		    throw new OneEventByLineNomObjetIntrouvableException(evenement[1], numLigne, nomFichierEntreeOEBL);
 	    }
 	    else {
 		throw new OneEventByLineFormatException(ligne, numLigne, nomFichierEntreeOEBL);
 	    }
 	};
 	
-	ligneDecoupee = new String[3];
-	evenements = new ArrayList<>(NB_EVENEMENTS) ;
-        tableau = new LinkedHashMap<>(this.configurateur.getNomsObjets().size()) ;
-        this.configurateur.getNomsObjets().forEach((nomObjet) -> {
-            tableau.put(nomObjet, new LinkedList<>());
-        });
+	evenement = new String[3] ;
+	padding = new int [configurateur.getNomsObjets().size()+1] ;
+	padding[0] = "timestamp".length() ;
+	Iterator<String> it = configurateur.getNomsObjets().iterator() ;
+	for (int i = 1 ; it.hasNext() ; i++)
+	    padding[i] = it.next().length() ;
+        tableau = new LinkedHashMap<>(NB_EVENEMENTS) ;
     }
     
     public Configurateur getConfigurateur() {
@@ -114,17 +110,18 @@ public final class Simulateur {
      */
     
     public void ecrireFormatCSV (String nomFichierSortie) throws OneEventByLineEcrireFormatCSVException {
+	System.out.println(Arrays.toString(padding));
 	try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie))) {
-	    bufferedWriter.write("timestamp"+Evenement.SEPARATEUR) ;
+	    bufferedWriter.write(String.format("%-" + padding[0] + "s", "timestamp")+Evenement.SEPARATEUR) ;
 	    Set<String> nomsObjets = configurateur.getNomsObjets() ;
-	    int n = nomsObjets.size() ;
+	    int n = 0 ;
 	    for (String nomObjet : nomsObjets)
-		bufferedWriter.write(nomObjet + (--n > 0 ? Evenement.SEPARATEUR : "\n")) ;
-	    for (Entry<String, List<String>> entrySet : tableau.entrySet()) {
-                n = entrySet.getValue().size() ;
-                bufferedWriter.write(entrySet.getKey()+Evenement.SEPARATEUR);
+		bufferedWriter.write(String.format("%-" + padding[n+1] + "s", nomObjet) + (++n < nomsObjets.size() ? Evenement.SEPARATEUR : "\n")) ;
+	    for (Entry<String, String[]> entrySet : tableau.entrySet()) {
+                n = 0 ;
+                bufferedWriter.write(String.format("%-" + padding[0] + "s", entrySet.getKey())+Evenement.SEPARATEUR);
                 for (String valeur : entrySet.getValue())
-                    bufferedWriter.write(valeur + (--n > 0 ? Evenement.SEPARATEUR : "\n"));
+                    bufferedWriter.write(String.format("%-" + padding[n+1] + "s", valeur != null ? valeur : "") + (++n < entrySet.getValue().length ? Evenement.SEPARATEUR : "\n"));
             }
 	} catch (IOException ex) {
 	    throw new OneEventByLineEcrireFormatCSVException(nomFichierSortie) ;
