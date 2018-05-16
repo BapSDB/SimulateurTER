@@ -1,33 +1,27 @@
 
 package one_event_by_line;
 
-import configurateur.Configurateur;
 import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
-import exceptions.one_event_by_line.OneEventByLineFichierIntrouvableException;
-import exceptions.one_event_by_line.OneEventByLineFormatException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit ;
-import simulateur.Simulateur;
-import util.Util;
 
 
 public class OneEventByLineJUnitTest {
     
-    Configurateur configurateur ;
-    Simulateur simulateur ;
+    //Configurateur configurateur ;
+    //Simulateur simulateur ;
     
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
     
     public OneEventByLineJUnitTest() throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	configurateur = new Configurateur("test/fichier_config/ressources/fichier_config.txt") ;
+	//configurateur = new Configurateur("test/fichier_config/ressources/fichier_config.txt") ;
     }
     
     @BeforeClass
@@ -46,13 +40,7 @@ public class OneEventByLineJUnitTest {
     public void tearDown() {
     }
 
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
-    
-    @Test
+    /*@Test
     public void lireFormatOneEventByLineFormatCorrect () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
 	new Simulateur(configurateur, "test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt").lireFormatOneEventByLine();
 	Util.execCommande(new String[]{"cat", "cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
@@ -68,6 +56,6 @@ public class OneEventByLineJUnitTest {
     public void lireFormatOneEventByLineFormaException () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
 	new Simulateur(configurateur, "test/one_event_by_line/ressources/OneEventByLineFormatException.txt").lireFormatOneEventByLine();
 	Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});
-    }
+    }*/
     
 }

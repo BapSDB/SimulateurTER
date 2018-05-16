@@ -3,44 +3,28 @@ package configurateur;
 import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
-import exceptions.fichier_config.ConfigFichierIntrouvableException;
-import exceptions.fichier_config.ConfigNomObjetException;
-import exceptions.fichier_config.ConfigNomObjetNonUniqueException;
-import exceptions.fichier_config.ConfigTraiterFichierExceptions;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import exceptions.config.ConfigFichierIntrouvableException;
+import exceptions.config.ConfigNomObjetException;
+import exceptions.config.ConfigTraiterFichierExceptions;
 import java.util.Set;
 import java.util.regex.Pattern;
+import simulateur.FabriqueSimulateur;
 import util.Util;
-import util.Util.AjouterElement;
 
 public final class Configurateur {
     
-    private Map<String,Integer> nomsObjets = new LinkedHashMap<>();
-    private final AjouterElement ajouterElement ;
+    private final FabriqueConfigurateur fc ;
 
-    public Configurateur(String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	
-	ajouterElement = (String ligne, String donnees, int numLigne) -> {
-	    if (donnees != null) {
-                if (!nomsObjets.containsKey(donnees)) {
-                    nomsObjets.put(donnees, nomsObjets.size());
-                } else {
-                    throw new ConfigNomObjetNonUniqueException(ligne, numLigne, nomFichierEntree) ;
-                }
-	    } else {
-		throw new ConfigNomObjetException(ligne, numLigne, nomFichierEntree) ;
-	    }
-	};
-	
-	lireObjets(nomFichierEntree);
+    public Configurateur(FabriqueConfigurateur fc) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
+	this.fc = fc ;
+	lireObjets() ;
     }
     
     /**
      * @return l'ensemble des noms d'objets
      */
     public Set<String> getNomsObjets() {
-	return nomsObjets.keySet() ;
+	return fc.traducteur.getNomsObjets().keySet() ;
     }
     
     /**
@@ -50,7 +34,11 @@ public final class Configurateur {
      * @return l'indice de la valeur associée au nom d'objet passé en paramètre
      */
     public int getNomObjetVersIndice(String nomObjet) {
-	return nomsObjets.get(nomObjet) ;
+	return fc.traducteur.getNomsObjets().get(nomObjet) ;
+    }
+
+    public String getNomFichierOEBL() {
+	return fc.traducteur.getNomFichierOEBL() ;
     }
     
     /**
@@ -66,7 +54,15 @@ public final class Configurateur {
      */
     
     public void lireObjets (String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	Util.lireDonnees(nomFichierEntree, Pattern.compile("\\w+"), ajouterElement, new ConfigTraiterFichierExceptions(nomFichierEntree));
+	Util.lireDonnees(Pattern.compile("\\w+"), fc.ajouterElement, new ConfigTraiterFichierExceptions(nomFichierEntree));
+    }
+    
+    public void lireObjets () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
+	
+    }
+    
+    public FabriqueSimulateur nouveauSimulateur () {
+	return new FabriqueSimulateur(this) ;
     }
     
 }

@@ -18,7 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import simulateur.Simulateur;
-import traducteur.Traducteur.TraduireLigne;
+import traducteur.FabriqueTraducteur.TraduireLigne;
 
 public class Util {
     
@@ -29,10 +29,10 @@ public class Util {
 	public void ajouter (String ligne, String donnees, int numLigne) throws LireDonneesException ;
     }
     
-    public static void lireDonnees (String nomFichierEntree, Pattern pattern, AjouterElement ajouterElement, TraiterFichierExceptions traiterFichierExceptions)
+    public static void lireDonnees (Pattern pattern, AjouterElement ajouterElement, TraiterFichierExceptions traiterFichierExceptions)
 	    throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
 	String ligne ;
-	try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(nomFichierEntree))) {
+	try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(traiterFichierExceptions.getNomFichierLu()))) {
 	    while ((ligne = lineNumberReader.readLine()) != null) {
 		try(Scanner scannerLigne = new Scanner(ligne)) {
 		    ajouterElement.ajouter(ligne, scannerLigne.findInLine(pattern), lineNumberReader.getLineNumber());
@@ -45,12 +45,12 @@ public class Util {
 	}
     }
     
-    public static void traduireFormatOriginalVersFormatOEBL(String nomFichierOriginal, String nomFichierOEBL, String nomFichierConfig, Pattern pattern, TraduireLigne traduireLigne, TraiterFichierExceptions traiterFichierExceptions) 
+    public static void traduireFormatOriginalVersFormatOEBL(Pattern pattern, TraduireLigne traduireLigne, TraiterFichierExceptions traiterFichierExceptions) 
 	    throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	String ligne ;
-	try (LineNumberReader  original = new LineNumberReader(new FileReader(nomFichierOriginal)) ;
-		BufferedWriter oebl = new BufferedWriter(new FileWriter(nomFichierOEBL)) ;
-		BufferedWriter config = new BufferedWriter(new FileWriter(nomFichierConfig))) {
+	try (LineNumberReader  original = new LineNumberReader(new FileReader(traiterFichierExceptions.getNomFichierOriginal())) ;
+		BufferedWriter oebl = new BufferedWriter(new FileWriter(traiterFichierExceptions.getNomFichierOEBL())) ;
+		BufferedWriter config = new BufferedWriter(new FileWriter(traiterFichierExceptions.getNomFichierConfig()))) {
 	    while ((ligne = original.readLine()) != null) {
 		try(Scanner scannerLigne = new Scanner(ligne)) {
 		    String ligneOEBL = traduireLigne.traduireLigne(ligne, scannerLigne.findInLine(pattern), original.getLineNumber(), config) ;
@@ -83,12 +83,12 @@ public class Util {
 	}
     }
     
-    public static String[] separerCheminNomFichier (String nomFichier) {
+    private static String[] separerCheminNomFichier (String nomFichier) {
 	int i = nomFichier.lastIndexOf("/") ;
 	return new String[]{nomFichier.substring(0, i+1), nomFichier.substring(i+1)} ;
     }
     
-    public static String[] separerNomFichierExtension (String nomFichier) {
+    private static String[] separerNomFichierExtension (String nomFichier) {
 	int i = nomFichier.lastIndexOf(".") ;
 	return new String[]{nomFichier.substring(0, i+1), nomFichier.substring(i+1)} ;
     }
@@ -97,6 +97,12 @@ public class Util {
 	String [] cheminNomfichier = separerCheminNomFichier(nomFichier) ;
 	String [] nomFichierExtension = separerNomFichierExtension(cheminNomfichier[1]) ;
 	return cheminNomfichier[0] + nomFichierExtension[0] + extension ;
+    }
+    
+    public static String [] obtenirCheminNomFichierExtension (String nomFichier) {
+	String [] cheminNomfichier = separerCheminNomFichier(nomFichier) ;
+	String [] nomFichierExtension = separerNomFichierExtension(cheminNomfichier[1]) ;
+	return new String[]{cheminNomfichier[0], nomFichierExtension[0],  nomFichierExtension[1]} ;
     }
     
     /*public static void main(String[] args) {

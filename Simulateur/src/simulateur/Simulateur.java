@@ -1,6 +1,6 @@
 package simulateur;
 
-import configurateur.Configurateur;
+import traducteur.FabriqueTraducteur;
 import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
@@ -12,26 +12,15 @@ import java.util.regex.Pattern;
 import java.util.Set;
 import exceptions.one_event_by_line.* ;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import traducteur.TraducteurMQTT;
-import traducteur.TraducteurSwitch2;
+import traducteur.Traducteur;
 import util.StringUtil;
 import util.TimeStamp;
 import util.Util;
-import util.Util.AjouterElement;
 
 public final class Simulateur {
     
-    private static final int NB_EVENEMENTS = 2 << 16 ;
-    private final Configurateur configurateur ;
-    private final AjouterElement ajouterElement ;
-    private final String nomFichierEntreeOEBL ;
-    private String [] evenement ;
-    private int [] padding ;
-    private Map<String, String[]> tableau ;
+    private final FabriqueSimulateur fs ;
     
     // Définition des expressions régulières
     // Pour l'analyse d'une ligne d'un fichier "one-event-by-line"
@@ -44,44 +33,13 @@ public final class Simulateur {
     
     private static final String TIMESTAMP = TimeStamp.FORMAT_UNSIGNED_LONG_LONG ;
     private static final String BLANCS = "[^\\S\\n]*" ;
-    private static final String SEPARATEUR = BLANCS + ";" + BLANCS ;
+            static final String SEPARATEUR = BLANCS + ";" + BLANCS ;
     private static final String NOM_OBJET = "[A-Za-z]\\w*" ;
     private static final String VALEUR = "[\\w\\.]+" ;
     private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
     
-    public Simulateur(Configurateur configurateur, String nomFichierEntreeOEBL) {
-	
-	this.configurateur = configurateur;
-	this.nomFichierEntreeOEBL = nomFichierEntreeOEBL ;
-        
-	ajouterElement = (String ligne, String donnees, int numLigne) -> {
-	    if (donnees != null) {
-		evenement = donnees.split(SEPARATEUR) ;
-		if (configurateur.getNomsObjets().contains(evenement[1])) {
-		    int indiceNomObjet = configurateur.getNomObjetVersIndice(evenement[1]) ;
-		    tableau.putIfAbsent(evenement[0], new String[configurateur.getNomsObjets().size()]);
-		    tableau.get(evenement[0])[indiceNomObjet] = evenement[2] ;
-		    padding[indiceNomObjet + 1] = Math.max(padding[indiceNomObjet + 1], evenement[2].length()) ;
-                }
-		else
-		    throw new OneEventByLineNomObjetIntrouvableException(evenement[1], numLigne, nomFichierEntreeOEBL);
-	    }
-	    else {
-		throw new OneEventByLineFormatException(ligne, numLigne, nomFichierEntreeOEBL);
-	    }
-	};
-	
-	evenement = new String[3] ;
-	padding = new int [configurateur.getNomsObjets().size()+1] ;
-	padding[0] = Math.max("timestamp".length(), TimeStamp.LONGUEUR_FORMAT_DATE_HEURE) ;
-	Iterator<String> it = configurateur.getNomsObjets().iterator() ;
-	for (int i = 1 ; it.hasNext() ; i++)
-	    padding[i] = it.next().length() ;
-        tableau = new LinkedHashMap<>(NB_EVENEMENTS) ;
-    }
-    
-    public Configurateur getConfigurateur() {
-	return configurateur;
+    public Simulateur(FabriqueSimulateur fs) {
+	this.fs = fs ;
     }
     
     /**
@@ -100,7 +58,7 @@ public final class Simulateur {
      */
     
     public void lireFormatOneEventByLine () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	Util.lireDonnees(nomFichierEntreeOEBL, PATTERN_ONE_EVENT_BY_LINE, ajouterElement, new OneEventByLineTraiterFichierExceptions(nomFichierEntreeOEBL));
+	Util.lireDonnees(PATTERN_ONE_EVENT_BY_LINE, fs.ajouterElement, new OneEventByLineTraiterFichierExceptions(fs.configurateur.getNomFichierOEBL()));
     }
     
     /**
@@ -114,22 +72,44 @@ public final class Simulateur {
      */
     
     public void ecrireFormatCSV (String nomFichierSortie) throws OneEventByLineEcrireFormatCSVException {
-	System.out.println(Arrays.toString(padding));
+	System.out.println(Arrays.toString(fs.padding));
 	try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie))) {
-	    bufferedWriter.write(StringUtil.centrer("timestamp", padding[0]) + Util.SEPARATEUR) ;
-	    Set<String> nomsObjets = configurateur.getNomsObjets() ;
+	    bufferedWriter.write(StringUtil.centrer("timestamp", fs.padding[0]) + Util.SEPARATEUR) ;
+	    Set<String> nomsObjets = fs.configurateur.getNomsObjets() ;
 	    int n = 0 ;
 	    for (String nomObjet : nomsObjets)
-		bufferedWriter.write(StringUtil.centrer(nomObjet, padding[n+1]) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
-	    for (Entry<String, String[]> entrySet : tableau.entrySet()) {
+		bufferedWriter.write(StringUtil.centrer(nomObjet, fs.padding[n+1]) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
+	    for (Entry<String, String[]> entrySet : fs.tableau.entrySet()) {
                 n = 0 ;
-                bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), padding[0]) + Util.SEPARATEUR);
+                bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), fs.padding[0]) + Util.SEPARATEUR);
                 for (String valeur : entrySet.getValue())
-                    bufferedWriter.write(StringUtil.centrer(valeur != null ? valeur : "", padding[n+1]) + (++n < entrySet.getValue().length ? Util.SEPARATEUR : "\n"));
+                    bufferedWriter.write(StringUtil.centrer(valeur != null ? valeur : "", fs.padding[n+1]) + (++n < entrySet.getValue().length ? Util.SEPARATEUR : "\n"));
             }
 	} catch (IOException ex) {
+	    ex.printStackTrace(System.err);
 	    throw new OneEventByLineEcrireFormatCSVException(nomFichierSortie) ;
 	}
+    }
+    
+    private static void verifierArguments (String [] args) {
+	if (args.length < 1) {
+	    System.err.println("usage : java simulateur.Simulateur <nom_de_fichier_de_traces.(sw2|mqtt|oebl)");
+	    System.exit(99);
+	}
+    }
+    
+    private static void traduireFormatOriginalVersFormatCSV (String nomFichierOriginal) {
+	try {
+	    Traducteur traducteur = FabriqueTraducteur.nouvelleFabrique(nomFichierOriginal).creer() ;
+	    traducteur.traduireFormatOriginalVersFormatOEBL();
+	    Simulateur simulateur = traducteur.nouvelleFabriqueConfigurateur().creer().nouveauSimulateur().creer() ;
+	    simulateur.lireFormatOneEventByLine();
+	    simulateur.ecrireFormatCSV("src/ressources/MQTT a4h ___ 1440497600511.log.csv");
+	    Util.execCommande(new String[]{"cat",traducteur.getNomFichierOEBL()});
+	} catch (SimulateurException ex) {
+	    ex.terminerExecutionSimulateur();
+	}
+	Util.execCommande(new String[]{"cat","src/ressources/MQTT a4h ___ 1440497600511.log.csv"});
     }
 
     /**
@@ -137,20 +117,8 @@ public final class Simulateur {
      */
     
     public static void main(String[] args) {
-	try {
-	    /*Simulateur simulateur = new Simulateur(new Configurateur("src/ressources/fichier_config.txt"), "test/one_event_by_line/ressources/OneEventByLineFormatCorrect.txt") ;
-	    simulateur.lireFormatOneEventByLine();
-	    simulateur.ecrireFormatCSV("test/one_event_by_line/ressources/fichier_tabulaire.csv");
-	    Util.execCommande(new String[]{"cat","test/one_event_by_line/ressources/fichier_tabulaire.csv"});*/
-	    new TraducteurMQTT("src/ressources/MQTT a4h ___ 1440497600511.log").traduireFormatOriginalVersFormatOEBL();
-	    Util.execCommande(new String[]{"cat","src/ressources/MQTT a4h ___ 1440497600511.oebl"});
-	    Simulateur simulateur = new Simulateur(new Configurateur("src/ressources/MQTT a4h ___ 1440497600511.config"), "src/ressources/MQTT a4h ___ 1440497600511.oebl") ;
-	    simulateur.lireFormatOneEventByLine();
-	    simulateur.ecrireFormatCSV("src/ressources/MQTT a4h ___ 1440497600511.csv");
-	    Util.execCommande(new String[]{"cat","src/ressources/MQTT a4h ___ 1440497600511.csv"});
-	} catch (SimulateurException ex) {
-	    ex.terminerExecutionSimulateur();
-	}
+	    verifierArguments(args);
+	    traduireFormatOriginalVersFormatCSV(args[0]);
     }
     
 }

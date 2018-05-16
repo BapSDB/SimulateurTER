@@ -1,5 +1,5 @@
 
-package exceptions.fichier_config;
+package exceptions.config;
 
 import exceptions.TraiterFichierExceptions;
 

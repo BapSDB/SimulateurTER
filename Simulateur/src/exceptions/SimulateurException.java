@@ -1,5 +1,7 @@
 package exceptions;
 
+import java.util.Arrays;
+
 public abstract class SimulateurException extends Exception {
     
     protected int codeErreur ;
@@ -12,7 +14,7 @@ public abstract class SimulateurException extends Exception {
     }
     
     public void terminerExecutionSimulateur () {
-	System.err.println(getMessage());
+	printStackTrace(System.err);
 	System.exit(codeErreur);
     }
     

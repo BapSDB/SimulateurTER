@@ -19,4 +19,20 @@ public abstract class TraiterFichierExceptions {
 	return entreeSortieException;
     }
     
+    public String getNomFichierLu() {
+	return fichierIntrouvableException.getNomFichier() ;
+    }
+    
+    public String getNomFichierOriginal() {
+	return entreeSortieException.getNomFichierOriginal() ;
+    }
+
+    public String getNomFichierOEBL() {
+	return entreeSortieException.getNomFichierOEBL() ;
+    }
+
+    public String getNomFichierConfig() {
+	return entreeSortieException.getNomFichierConfig() ;
+    }
+    
 }

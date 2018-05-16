@@ -4,8 +4,8 @@ import exceptions.FichierIntrouvableException;
 
 public class OneEventByLineFichierIntrouvableException extends FichierIntrouvableException {
 
-    public OneEventByLineFichierIntrouvableException(String nomFichierEntree) {
-	super("\"Le fichier \"one-event-by-line\" \"" + nomFichierEntree + "\" n'existe pas\"");
+    public OneEventByLineFichierIntrouvableException(String nomFichierOEBL) {
+	super("\"Le fichier \"one-event-by-line\" \"" + nomFichierOEBL + "\" n'existe pas\"", nomFichierOEBL);
 	codeErreur = 1 ;
     }
     

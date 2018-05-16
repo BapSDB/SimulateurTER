@@ -1,16 +1,17 @@
 
-package traducteur;
+package traducteur.switch2;
 
 import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
-import exceptions.fichier_config.ConfigEcrireObjetsException;
+import exceptions.config.ConfigEcrireObjetsException;
 import exceptions.traducteur.TraducteurTraiterFichierExceptions;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.regex.Pattern;
+import traducteur.Traducteur;
 import util.TimeStamp;
 import util.Util;
 
@@ -32,32 +33,23 @@ public class TraducteurSwitch2 extends Traducteur {
     private static final String TIMESTAMP = TimeStamp.FORMAT_DATE_HEURE ;
     private static final String ID = "ZWave_SWITCH_BINARY_2" ;
     private static final String BLANCS = "[^\\S\\n]+" ;
-    private static final String SEPARATEUR = BLANCS ;
+            static final String SEPARATEUR = BLANCS ;
     private static final String NOM_OBJET = "power:" ;
     private static final String VALEUR = "\\d+" ;
     private static final String UNITE = "W" ;
     private static final Pattern PATTERN_SWITCH2 = Pattern.compile(TIMESTAMP+SEPARATEUR+ID+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR+SEPARATEUR+UNITE) ;
 
-    public TraducteurSwitch2(String nomFichierOriginal) {
-	super(nomFichierOriginal) ;
-	traduireLigne = (String ligne, String donnees, int numLigne, BufferedWriter config) -> {
-	    if (donnees != null) {
-		String [] evenements = donnees.split(SEPARATEUR) ;
-		TimeStamp.verifierDate(evenements, nomFichierOriginal, numLigne);
-		return evenements[0] + Util.SEPARATEUR + evenements[2].substring(0, evenements[2].length()-1) + Util.SEPARATEUR + evenements[3] ;
-	    }
-	    return null ;
-	} ;
+    public TraducteurSwitch2(FabriqueTraducteurSwitch2 ft) {
+	super(ft);
     }
-
     
     @Override
     public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
-	Util.traduireFormatOriginalVersFormatOEBL(nomFichierOriginal, nomFichierOEBL, nomFichierConfig, PATTERN_SWITCH2, traduireLigne, new TraducteurTraiterFichierExceptions(nomFichierOriginal, nomFichierOEBL, nomFichierConfig));
-	try (BufferedWriter config = new BufferedWriter(new FileWriter(nomFichierConfig))) {
+	Util.traduireFormatOriginalVersFormatOEBL(PATTERN_SWITCH2, getTraduireLigne(), new TraducteurTraiterFichierExceptions(getNomFichierOriginal(), getNomFichierOEBL(), getNomFichierConfig()));
+	try (BufferedWriter config = new BufferedWriter(new FileWriter(getNomFichierConfig()))) {
 	    config.write("power") ;
 	} catch (IOException ex) {
-	    throw new ConfigEcrireObjetsException(nomFichierConfig);
+	    throw new ConfigEcrireObjetsException(getNomFichierConfig());
 	}
     }
     

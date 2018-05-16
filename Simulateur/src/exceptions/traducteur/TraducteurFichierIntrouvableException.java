@@ -5,8 +5,8 @@ import exceptions.FichierIntrouvableException;
 
 public class TraducteurFichierIntrouvableException extends FichierIntrouvableException {
 
-    public TraducteurFichierIntrouvableException(String nomFichierEntree) {
-	super("\"Le fichier à traduire \"" + nomFichierEntree + "\" n'existe pas\"");
+    public TraducteurFichierIntrouvableException(String nomFichierOriginal) {
+	super("\"Le fichier à traduire \"" + nomFichierOriginal + "\" n'existe pas\"", nomFichierOriginal);
 	codeErreur = 13 ;
     }
     
