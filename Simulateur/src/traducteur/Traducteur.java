@@ -3,12 +3,17 @@ package traducteur;
 
 import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
+import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
 import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import static util.Util.obtenirNomFichier;
 
 public abstract class Traducteur {
     
+    protected Map<String,Integer> nomsObjets = new LinkedHashMap<>();
     protected String nomFichierOriginal ;
     protected String nomFichierOEBL ;
     protected String nomFichierConfig ;
@@ -29,7 +34,8 @@ public abstract class Traducteur {
      * @throws TimeStampException
      * si un timestamp n'a pas pu être parsé ou est incohérent.
      */
-    public abstract void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, TimeStampException ;
+
+    public abstract void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException ;
     
     /**
      * Permet au Traducteur de spécifier la traduction d'une ligne d'un fichier
@@ -49,8 +55,10 @@ public abstract class Traducteur {
 	 * @return la ligne de données traduite
 	 * @throws TimeStampException 
 	 * si un timestamp n'a pas pu être parsé ou est incohérent.
+	 * @throws IOException
+	 * @throws LireDonneesException
 	 */
-	public String traduireLigne(String ligne, String donnees, int numLigne, BufferedWriter config) throws TimeStampException ;
+	public String traduireLigne(String ligne, String donnees, int numLigne, BufferedWriter config) throws TimeStampException, IOException, LireDonneesException ;
     }
 
     public String getNomFichierOriginal() {

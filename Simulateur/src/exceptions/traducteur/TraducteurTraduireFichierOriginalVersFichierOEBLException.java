@@ -12,8 +12,8 @@ import exceptions.EntreeSortieException;
  * @author bleuzeb
  */
 public class TraducteurTraduireFichierOriginalVersFichierOEBLException extends EntreeSortieException {
-    public TraducteurTraduireFichierOriginalVersFichierOEBLException(String nomFichierOriginal, String nomFichierOEBL) {
-	super("Une erreur de lecure/écriture lors de la traduction des données est apparue dans le fichier " + nomFichierOriginal + " ou " + nomFichierOEBL + ".") ;
+    public TraducteurTraduireFichierOriginalVersFichierOEBLException(String nomFichierOriginal, String nomFichierOEBL, String nomFichierConfig) {
+	super("Une erreur de lecure/écriture lors de la traduction des données est apparue dans le fichier " + nomFichierOriginal + " ou " + nomFichierOEBL + " ou " + nomFichierConfig + ".") ;
 	codeErreur = 14 ;
     }
 }

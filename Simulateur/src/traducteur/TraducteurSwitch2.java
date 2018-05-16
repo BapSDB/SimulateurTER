@@ -3,6 +3,7 @@ package traducteur;
 
 import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
+import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
 import exceptions.fichier_config.ConfigEcrireObjetsException;
 import exceptions.traducteur.TraducteurTraiterFichierExceptions;
@@ -51,8 +52,8 @@ public class TraducteurSwitch2 extends Traducteur {
 
     
     @Override
-    public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, TimeStampException {
-	Util.traduireFormatOriginalVersFormatOEBL(nomFichierOriginal, nomFichierOEBL, nomFichierConfig, PATTERN_SWITCH2, traduireLigne, new TraducteurTraiterFichierExceptions(nomFichierOriginal, nomFichierOEBL));
+    public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+	Util.traduireFormatOriginalVersFormatOEBL(nomFichierOriginal, nomFichierOEBL, nomFichierConfig, PATTERN_SWITCH2, traduireLigne, new TraducteurTraiterFichierExceptions(nomFichierOriginal, nomFichierOEBL, nomFichierConfig));
 	try (BufferedWriter config = new BufferedWriter(new FileWriter(nomFichierConfig))) {
 	    config.write("power") ;
 	} catch (IOException ex) {

@@ -46,7 +46,7 @@ public class Util {
     }
     
     public static void traduireFormatOriginalVersFormatOEBL(String nomFichierOriginal, String nomFichierOEBL, String nomFichierConfig, Pattern pattern, TraduireLigne traduireLigne, TraiterFichierExceptions traiterFichierExceptions) 
-	    throws FichierIntrouvableException, EntreeSortieException, TimeStampException {
+	    throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	String ligne ;
 	try (LineNumberReader  original = new LineNumberReader(new FileReader(nomFichierOriginal)) ;
 		BufferedWriter oebl = new BufferedWriter(new FileWriter(nomFichierOEBL)) ;
