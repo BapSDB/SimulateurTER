@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import traducteur.mqtt.FabriqueTraducteurMQTT;
 import traducteur.oebl.FabriqueTraducteurOEBL;
-import traducteur.switch2.FabriqueTraducteurSwitch2;
+import traducteur.sw2.FabriqueTraducteurSwitch2;
 import util.Util;
 
 public abstract class FabriqueTraducteur {

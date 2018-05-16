@@ -93,10 +93,9 @@ public class Util {
 	return new String[]{nomFichier.substring(0, i+1), nomFichier.substring(i+1)} ;
     }
     
-    public static String obtenirNomFichier (String nomFichier, String extension) {
-	String [] cheminNomfichier = separerCheminNomFichier(nomFichier) ;
-	String [] nomFichierExtension = separerNomFichierExtension(cheminNomfichier[1]) ;
-	return cheminNomfichier[0] + nomFichierExtension[0] + extension ;
+    
+    public static String obtenirNomFichier (String nomFichier) {
+	return separerCheminNomFichier(nomFichier)[1] ;
     }
     
     public static String [] obtenirCheminNomFichierExtension (String nomFichier) {

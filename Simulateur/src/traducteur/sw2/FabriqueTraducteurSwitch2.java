@@ -1,12 +1,12 @@
 
-package traducteur.switch2;
+package traducteur.sw2;
 
 import java.io.BufferedWriter;
 import traducteur.FabriqueTraducteur;
 import traducteur.Traducteur;
 import util.TimeStamp;
 import util.Util;
-import static traducteur.switch2.TraducteurSwitch2.SEPARATEUR;
+import static traducteur.sw2.TraducteurSwitch2.SEPARATEUR;
 
 public class FabriqueTraducteurSwitch2 extends FabriqueTraducteur {
     

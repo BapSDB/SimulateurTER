@@ -9,6 +9,7 @@ import exceptions.config.ConfigTraiterFichierExceptions;
 import java.util.Set;
 import java.util.regex.Pattern;
 import simulateur.FabriqueSimulateur;
+import static simulateur.Simulateur.OEBL;
 import util.Util;
 
 public final class Configurateur {
@@ -17,7 +18,10 @@ public final class Configurateur {
 
     public Configurateur(FabriqueConfigurateur fc) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
 	this.fc = fc ;
-	lireObjets() ;
+	if (!fc.traducteur.Existe() && fc.traducteur.estOEBL()) {
+	    System.out.println("lol");
+	    lireObjets(fc.traducteur.getNomFichierConfig()) ;
+	}
     }
     
     /**
@@ -41,6 +45,10 @@ public final class Configurateur {
 	return fc.traducteur.getNomFichierOEBL() ;
     }
     
+    public String getNomFichierCSV() {
+	return fc.traducteur.getNomFichierCSV() ;
+    }
+    
     /**
      * Lit un fichier de configuration listant les objets utilisés dans la simulation
      * @param nomFichierEntree
@@ -54,15 +62,11 @@ public final class Configurateur {
      */
     
     public void lireObjets (String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	Util.lireDonnees(Pattern.compile("\\w+"), fc.ajouterElement, new ConfigTraiterFichierExceptions(nomFichierEntree));
-    }
-    
-    public void lireObjets () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	
+	Util.lireDonnees(Pattern.compile("\\w+"), fc.ajouterElement, new ConfigTraiterFichierExceptions(OEBL+Util.obtenirNomFichier(nomFichierEntree)));
     }
     
     public FabriqueSimulateur nouveauSimulateur () {
-	return new FabriqueSimulateur(this) ;
+	return new FabriqueSimulateur(this, fc.traducteur.Existe(), fc.traducteur.estOEBL()) ;
     }
     
 }

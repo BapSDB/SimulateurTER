@@ -17,5 +17,9 @@ public class TraducteurOEBL extends Traducteur {
     public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	
     }
+    @Override
+    public boolean estOEBL() {
+	return true ;
+    }
     
 }

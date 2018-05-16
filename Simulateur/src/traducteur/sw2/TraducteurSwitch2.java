@@ -1,5 +1,5 @@
 
-package traducteur.switch2;
+package traducteur.sw2;
 
 import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
@@ -51,6 +51,11 @@ public class TraducteurSwitch2 extends Traducteur {
 	} catch (IOException ex) {
 	    throw new ConfigEcrireObjetsException(getNomFichierConfig());
 	}
+    }
+    
+    @Override
+    public boolean estOEBL() {
+	return false ;
     }
     
 }

@@ -55,5 +55,10 @@ public class TraducteurMQTT extends Traducteur {
         System.out.println("1440497603216 {\"topic\":\"/a4h/out/Presence_Lit/command\",\"name\":\"Presence_Lit\",\"operation\":\"command\",\"message\":\"OFF\"}".
                 replaceFirst(TIMESTAMP+SEPARATEUR+"\\{"+TOPIC+","+NOM_OBJET+","+TYPE+","+VALEUR+"\\}", "true"));
     }*/
-    
+
+    @Override
+    public boolean estOEBL() {
+	return false ;
+    }
+
 }

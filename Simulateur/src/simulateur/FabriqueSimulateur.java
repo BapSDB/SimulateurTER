@@ -15,6 +15,7 @@ public class FabriqueSimulateur {
     
     static final int NB_EVENEMENTS = 2 << 16 ;
     Configurateur configurateur ;
+    boolean existe, estOEBL ;
     int [] padding ;
     Map<String, String[]> tableau ;
     
@@ -35,9 +36,10 @@ public class FabriqueSimulateur {
 	}
     };
 
-    public FabriqueSimulateur(Configurateur configurateur) {
+    public FabriqueSimulateur(Configurateur configurateur, boolean existe, boolean estOEBL) {
 	this.configurateur = configurateur;
-	
+	this.existe = existe ;
+	this.estOEBL = estOEBL ;
 	padding = new int [configurateur.getNomsObjets().size()+1] ;
 	padding[0] = Math.max("timestamp".length(), TimeStamp.LONGUEUR_FORMAT_DATE_HEURE) ;
 	Iterator<String> it = configurateur.getNomsObjets().iterator() ;

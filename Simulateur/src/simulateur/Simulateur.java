@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.Set;
 import exceptions.one_event_by_line.* ;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import traducteur.Traducteur;
@@ -21,6 +22,9 @@ import util.Util;
 public final class Simulateur {
     
     private final FabriqueSimulateur fs ;
+    public static final String RESSOURCES = "src/ressources/" ;
+    public static final String OEBL = RESSOURCES + "oebl/" ;
+    public static final String CSV = RESSOURCES + "csv/" ;
     
     // Définition des expressions régulières
     // Pour l'analyse d'une ligne d'un fichier "one-event-by-line"
@@ -58,36 +62,40 @@ public final class Simulateur {
      */
     
     public void lireFormatOneEventByLine () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	Util.lireDonnees(PATTERN_ONE_EVENT_BY_LINE, fs.ajouterElement, new OneEventByLineTraiterFichierExceptions(fs.configurateur.getNomFichierOEBL()));
+	if (!fs.existe && fs.estOEBL) {
+	    System.out.println("lol");
+	    Util.lireDonnees(PATTERN_ONE_EVENT_BY_LINE, fs.ajouterElement, new OneEventByLineTraiterFichierExceptions(OEBL+Util.obtenirNomFichier(fs.configurateur.getNomFichierOEBL())));
+	}
     }
     
     /**
      * Ecrit dans un fichier au format CSV les données sous une forme tabulaire
-     * @param nomFichierSortie
-     * * Le chemin (absolu ou relatif) <p> + nom du fichier où seront écrites les données
      * @throws OneEventByLineEcrireFormatCSVException
      * si une erreur est apparue lors de l'écriture du fichier
      * @since V1
      * @see lireFormatOneEventByLine
      */
     
-    public void ecrireFormatCSV (String nomFichierSortie) throws OneEventByLineEcrireFormatCSVException {
-	System.out.println(Arrays.toString(fs.padding));
-	try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierSortie))) {
-	    bufferedWriter.write(StringUtil.centrer("timestamp", fs.padding[0]) + Util.SEPARATEUR) ;
-	    Set<String> nomsObjets = fs.configurateur.getNomsObjets() ;
-	    int n = 0 ;
-	    for (String nomObjet : nomsObjets)
-		bufferedWriter.write(StringUtil.centrer(nomObjet, fs.padding[n+1]) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
-	    for (Entry<String, String[]> entrySet : fs.tableau.entrySet()) {
-                n = 0 ;
-                bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), fs.padding[0]) + Util.SEPARATEUR);
-                for (String valeur : entrySet.getValue())
-                    bufferedWriter.write(StringUtil.centrer(valeur != null ? valeur : "", fs.padding[n+1]) + (++n < entrySet.getValue().length ? Util.SEPARATEUR : "\n"));
-            }
-	} catch (IOException ex) {
-	    ex.printStackTrace(System.err);
-	    throw new OneEventByLineEcrireFormatCSVException(nomFichierSortie) ;
+    public void ecrireFormatCSV () throws OneEventByLineEcrireFormatCSVException {
+	if (!new File(CSV+Util.obtenirNomFichier(fs.configurateur.getNomFichierCSV())).exists()) {
+	    System.out.println("lol");
+	    System.out.println(Arrays.toString(fs.padding));
+	    try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(CSV+Util.obtenirNomFichier(fs.configurateur.getNomFichierCSV())))) {
+		bufferedWriter.write(StringUtil.centrer("timestamp", fs.padding[0]) + Util.SEPARATEUR) ;
+		Set<String> nomsObjets = fs.configurateur.getNomsObjets() ;
+		int n = 0 ;
+		for (String nomObjet : nomsObjets)
+		    bufferedWriter.write(StringUtil.centrer(nomObjet, fs.padding[n+1]) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
+		for (Entry<String, String[]> entrySet : fs.tableau.entrySet()) {
+		    n = 0 ;
+		    bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), fs.padding[0]) + Util.SEPARATEUR);
+		    for (String valeur : entrySet.getValue())
+			bufferedWriter.write(StringUtil.centrer(valeur != null ? valeur : "", fs.padding[n+1]) + (++n < entrySet.getValue().length ? Util.SEPARATEUR : "\n"));
+		}
+	    } catch (IOException ex) {
+		ex.printStackTrace(System.err);
+		throw new OneEventByLineEcrireFormatCSVException(CSV+Util.obtenirNomFichier(fs.configurateur.getNomFichierCSV())) ;
+	    }
 	}
     }
     
@@ -101,15 +109,17 @@ public final class Simulateur {
     private static void traduireFormatOriginalVersFormatCSV (String nomFichierOriginal) {
 	try {
 	    Traducteur traducteur = FabriqueTraducteur.nouvelleFabrique(nomFichierOriginal).creer() ;
-	    traducteur.traduireFormatOriginalVersFormatOEBL();
+	    traducteur.appliquerTraduction();
 	    Simulateur simulateur = traducteur.nouvelleFabriqueConfigurateur().creer().nouveauSimulateur().creer() ;
 	    simulateur.lireFormatOneEventByLine();
-	    simulateur.ecrireFormatCSV("src/ressources/MQTT a4h ___ 1440497600511.log.csv");
-	    Util.execCommande(new String[]{"cat",traducteur.getNomFichierOEBL()});
+	    simulateur.ecrireFormatCSV();
+	    //Util.execCommande(new String[]{"cat",traducteur.getNomFichierOEBL()});
+	    //Util.execCommande(new String[]{"cat", traducteur.getNomFichierCSV()});
 	} catch (SimulateurException ex) {
 	    ex.terminerExecutionSimulateur();
+	} catch (IOException ex) {
+	    ex.printStackTrace(System.err);
 	}
-	Util.execCommande(new String[]{"cat","src/ressources/MQTT a4h ___ 1440497600511.log.csv"});
     }
 
     /**
