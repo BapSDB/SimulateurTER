@@ -35,11 +35,20 @@ public final class Configurateur {
 	
 	lireObjets(nomFichierEntree);
     }
-
+    
+    /**
+     * @return l'ensemble des noms d'objets
+     */
     public Set<String> getNomsObjets() {
 	return nomsObjets.keySet() ;
     }
     
+    /**
+     * 
+     * @param nomObjet
+     * Le nom d'objet pour lequel on souhaite retrouver l'indice de la valeur associée dans le {@link simulateur.Simulateur#tableau}
+     * @return l'indice de la valeur associée au nom d'objet passé en paramètre
+     */
     public int getNomObjetVersIndice(String nomObjet) {
 	return nomsObjets.get(nomObjet) ;
     }
@@ -49,7 +58,11 @@ public final class Configurateur {
      * @param nomFichierEntree
      * Le chemin (absolu ou relatif) <p> + nom du fichier de configuration à lire.
      * @throws ConfigNomObjetException
+     * si le un nom d'objet ne respecte pas la convention de nommage.
      * @throws ConfigFichierIntrouvableException
+     * si le fichier de configuration n'existe pas.
+     * @throws EntreeSortieException
+     * si une erreur d'entrée/sortie est apparue
      */
     
     public void lireObjets (String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {

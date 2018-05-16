@@ -49,12 +49,7 @@ public class TraducteurSwitch2 extends Traducteur {
 	} ;
     }
 
-    /**
-     *
-     * @throws FichierIntrouvableException
-     * @throws EntreeSortieException
-     * @throws TimeStampException
-     */
+    
     @Override
     public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, TimeStampException {
 	Util.traduireFormatOriginalVersFormatOEBL(nomFichierOriginal, nomFichierOEBL, nomFichierConfig, PATTERN_SWITCH2, traduireLigne, new TraducteurTraiterFichierExceptions(nomFichierOriginal, nomFichierOEBL));
