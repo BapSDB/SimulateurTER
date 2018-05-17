@@ -11,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.regex.Pattern;
+import static simulateur.Simulateur.OEBL;
 import traducteur.Traducteur;
 import util.TimeStamp;
 import util.Util;
@@ -45,7 +46,7 @@ public class TraducteurSwitch2 extends Traducteur {
     
     @Override
     public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
-	Util.traduireFormatOriginalVersFormatOEBL(PATTERN_SWITCH2, getTraduireLigne(), new TraducteurTraiterFichierExceptions(getNomFichierOriginal(), getNomFichierOEBL(), getNomFichierConfig()));
+	Util.traduireFormatOriginalVersFormatOEBL(PATTERN_SWITCH2, getTraduireLigne(), new TraducteurTraiterFichierExceptions(getNomFichierOriginal(), OEBL+Util.obtenirNomFichier(getNomFichierOEBL()), OEBL+Util.obtenirNomFichier(getNomFichierConfig())));
 	try (BufferedWriter config = new BufferedWriter(new FileWriter(getNomFichierConfig()))) {
 	    config.write("power") ;
 	} catch (IOException ex) {

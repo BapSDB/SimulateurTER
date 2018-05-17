@@ -3,8 +3,10 @@ package traducteur;
 
 import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
+import exceptions.traducteur.TraducteurFichierIntrouvableException;
 import exceptions.traducteur.TraducteurFormatFichierInconnuException;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,7 +56,10 @@ public abstract class FabriqueTraducteur {
 	this.nomFichierCSV = nomFichierCSV;
     }
     
-    public static FabriqueTraducteur nouvelleFabrique (String nomFichierOriginal) throws TraducteurFormatFichierInconnuException {
+    public static FabriqueTraducteur nouvelleFabrique (String nomFichierOriginal) throws TraducteurFichierIntrouvableException, TraducteurFormatFichierInconnuException {
+	
+	if (!new File(nomFichierOriginal).exists())
+	    throw new TraducteurFichierIntrouvableException(nomFichierOriginal);
 	
 	String [] cheminNomFichierExtension = Util.obtenirCheminNomFichierExtension(nomFichierOriginal) ;
 	String nomFichierOEBL = cheminNomFichierExtension[0] + cheminNomFichierExtension[1] + "oebl" ;

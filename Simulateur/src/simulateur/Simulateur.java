@@ -117,8 +117,6 @@ public final class Simulateur {
 	    //Util.execCommande(new String[]{"cat", traducteur.getNomFichierCSV()});
 	} catch (SimulateurException ex) {
 	    ex.terminerExecutionSimulateur();
-	} catch (IOException ex) {
-	    ex.printStackTrace(System.err);
 	}
     }
 

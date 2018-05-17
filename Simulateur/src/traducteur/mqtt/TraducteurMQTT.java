@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import traducteur.Traducteur;
 import util.TimeStamp;
 import util.Util;
+import static simulateur.Simulateur.OEBL;
 
 
 public class TraducteurMQTT extends Traducteur {
@@ -48,7 +49,7 @@ public class TraducteurMQTT extends Traducteur {
      */
     @Override
     public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
-	Util.traduireFormatOriginalVersFormatOEBL(PATTERN_MQQT, getTraduireLigne(), new TraducteurTraiterFichierExceptions(getNomFichierOriginal(), getNomFichierOEBL(), getNomFichierConfig()));
+	Util.traduireFormatOriginalVersFormatOEBL(PATTERN_MQQT, getTraduireLigne(), new TraducteurTraiterFichierExceptions(getNomFichierOriginal(), OEBL+Util.obtenirNomFichier(getNomFichierOEBL()), OEBL+Util.obtenirNomFichier(getNomFichierConfig())));
     }
     
     /*public static void main(String[] args) {

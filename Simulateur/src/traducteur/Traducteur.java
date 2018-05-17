@@ -33,19 +33,16 @@ public abstract class Traducteur {
      * @throws EntreeSortieException
      * @throws LireDonneesException
      * @throws TimeStampException 
-     * @throws IOException 
      */
-    public void appliquerTraduction () throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException, IOException {
+    public void appliquerTraduction () throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	String RacineOEBL = Util.obtenirNomFichier(ft.nomFichierOEBL) ;
 	String RacineConfig = Util.obtenirNomFichier(ft.nomFichierConfig) ;
 	if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
+	    System.out.println("Le fichier " + ft.nomFichierOriginal + "est en cours de traduction...");
 	    traduireFormatOriginalVersFormatOEBL();
-	    CopyOption [] options = {} ;
-	    System.out.println(getNomFichierOEBL());
-	    System.out.println(Paths.get(getNomFichierOEBL()));
-	    Files.move(Paths.get(getNomFichierOEBL()), Paths.get(OEBL+RacineOEBL).toAbsolutePath(), options) ;
-	    Files.move(Paths.get(getNomFichierConfig()), Paths.get(OEBL+RacineConfig).toAbsolutePath(), options) ;
+	    System.out.println("Traduction terminée --> création des fichiers " + OEBL+RacineOEBL + " et " + OEBL+RacineConfig + ".") ;
 	}
+	System.out.println("Le fichier " + ft.nomFichierOriginal + " existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.");
     }
     
     /**
