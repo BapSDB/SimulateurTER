@@ -128,15 +128,18 @@ public class TableauCSV {
 		lc.inserer(t);
 	    });
 	    System.out.println(lc);
+            for (Integer integer : lc) {
+                System.out.println(integer);
+            }
 	}
 	
 	public static class ListeChaineeOrdonneeIterateur<E> implements Iterator<E> {
 	    
 	    Maillon<E> courant, fictif ;
 
-	    public ListeChaineeOrdonneeIterateur(ListeChaineeOrdonnee listeChaineeOrdonnee) {
+	    public ListeChaineeOrdonneeIterateur(ListeChaineeOrdonnee<E> listeChaineeOrdonnee) {
 		fictif = listeChaineeOrdonnee.fictif ;
-		courant = listeChaineeOrdonnee.fictif.suivant ;
+		courant = listeChaineeOrdonnee.fictif ;
 	    }
 
 	    @Override

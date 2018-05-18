@@ -71,7 +71,6 @@ public final class Simulateur {
 			    ValeurPosition valeur = it.next() ;
 			    padding = positionPadding.next().getPadding() ;
 			    while(n < valeur.getPosition()) {
-				System.out.println(valeur.getPosition());
 				bufferedWriter.write(StringUtil.centrer("", padding) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n"));
 				padding = positionPadding.next().getPadding() ;
 			    }
