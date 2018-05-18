@@ -22,8 +22,8 @@ public class FabriqueTraducteurMQTT extends FabriqueTraducteur {
 	    strings = strings[1].substring(1,strings[1].length()-1).split(",") ;
 	    String nomObjet = (nomObjet = strings[1].split(":")[1]).substring(1, nomObjet.length()-1) ;
 	    String valeur = (valeur = strings[3].split(":")[1]).substring(1, valeur.length()-1) ;
-            ecrireNomObjet(nomObjet, config);
-            lireValeur(timestamp, nomObjet, valeur);
+            tableauCSV.ecrireNomObjet(nomObjet, config);
+            tableauCSV.lireValeur(timestamp, nomObjet, valeur);
 	    return timestamp + Util.SEPARATEUR + nomObjet + Util.SEPARATEUR + valeur ;
 	}
 	return null ;

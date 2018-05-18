@@ -4,42 +4,65 @@ package traducteur;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class TableauCSV {
     
-    private static class NomObjet implements Comparable<NomObjet> {
+    public static class ValeurPosition implements Comparable<ValeurPosition> {
 	
-	private final String nomObjet ;
+	private final String valeur ;
 	private final Integer position ;
-	private int padding ;
 
-	public NomObjet(String nomObjet, int position) {
-	    this.nomObjet = nomObjet;
+	public ValeurPosition(String valeur, int position) {
+	    this.valeur = valeur;
 	    this.position = position;
 	}
 
 	@Override
-	public int compareTo(NomObjet o) {
+	public int compareTo(ValeurPosition o) {
 	    return position.compareTo(o.position) ;
 	}
-	
+
+	public String getValeur() {
+	    return valeur;
+	}
+
+	public Integer getPosition() {
+	    return position;
+	}
 	
     }
     
-    private static class ListeChaineeOrdonnee<T> {
+    public static class PositionPadding {
 	
+	private final Integer position ;
+	private int padding ;
+
+	public PositionPadding(Integer position, int padding) {
+	    this.position = position;
+	    this.padding = padding;
+	}
+
+	public Integer getPosition() {
+	    return position;
+	}
+
+	public int getPadding() {
+	    return padding;
+	}
+	
+    }
+    
+    public static class ListeChaineeOrdonnee<T> implements Iterable<T> {
+
 	private static class Maillon<T> {
 	    
-	    private T element ;
+	    private final T element ;
 	    private Maillon<T> suivant ;
 
 	    public Maillon(T element, Maillon<T> suivant) {
@@ -74,6 +97,7 @@ public class TableauCSV {
 		precedent.suivant = maillon ;
 	    else
 		fictif.suivant = maillon ;
+	    size++ ;
 	}
 
 	@Override
@@ -92,7 +116,7 @@ public class TableauCSV {
 	}
 	
 	public static void main(String[] args) {
-	    List<Integer> l = new Random().ints(1, 0, 1).boxed().collect(Collectors.toList()) ;
+	    List<Integer> l = new Random().ints(10, 0, 10).boxed().collect(Collectors.toList()) ;
 	    ListeChaineeOrdonnee<Integer> lc = new ListeChaineeOrdonnee<>(Comparator.<Integer>naturalOrder()) ;
 	    System.out.println(l);
 	    l.forEach((Integer t) -> {
@@ -101,22 +125,71 @@ public class TableauCSV {
 	    System.out.println(lc);
 	}
 	
+	public static class ListeChaineeOrdonneeIterateur<E> implements Iterator<E> {
+	    
+	    Maillon<E> courant, fictif ;
+
+	    public ListeChaineeOrdonneeIterateur(ListeChaineeOrdonnee listeChaineeOrdonnee) {
+		fictif = listeChaineeOrdonnee.fictif ;
+		courant = listeChaineeOrdonnee.fictif.suivant ;
+	    }
+
+	    @Override
+	    public boolean hasNext() {
+		return courant.suivant != fictif ;
+	    }
+
+	    @Override
+	    public E next() {
+		courant = courant.suivant ;
+		return courant.element ;
+	    }
+	    
+	}
+	
+	@Override
+	public ListeChaineeOrdonneeIterateur<T> iterator() {
+	    return new ListeChaineeOrdonneeIterateur<>(this) ;
+	}
+	
+	
     } 
     
     private static final int NB_EVENEMENTS = 2 << 16 ;
-    private final Set<String> nomsObjets = new LinkedHashSet<>() ;
-    private final Map<String, ListeChaineeOrdonnee<NomObjet>> tableau = new LinkedHashMap<>(NB_EVENEMENTS) ;
+    private final Map<String, PositionPadding> nomsObjets = new LinkedHashMap<>() ;
+    private final Map<String, ListeChaineeOrdonnee<ValeurPosition>> tableau = new LinkedHashMap<>(NB_EVENEMENTS) ;
+    private int paddingTimeStamp ;
     
     public void ecrireNomObjet (String nomObjet, BufferedWriter config) throws IOException {
-        if (!nomsObjets.contains(nomObjet)) {
-            nomsObjets.add(nomObjet);
-            config.write(nomObjet+"\n");
+        if (!nomsObjets.containsKey(nomObjet)) {
+            nomsObjets.put(nomObjet, new PositionPadding(nomsObjets.size(), nomObjet.length())) ;
+            config.write(nomObjet+"\n") ;
         }
     }
     
     public void lireValeur (String timestamp, String nomObjet, String valeur) {
-        tableau.putIfAbsent(timestamp, new ListeChaineeOrdonnee<>(Comparator.<NomObjet>naturalOrder()));
-        tableau.get(timestamp).put(nomsObjets.get(nomObjet), valeur) ;
+        tableau.putIfAbsent(timestamp, new ListeChaineeOrdonnee<>(Comparator.<ValeurPosition>naturalOrder()));
+	PositionPadding positionPadding = nomsObjets.get(nomObjet) ;
+	positionPadding.padding = Math.max(positionPadding.padding, valeur.length()) ;
+	ValeurPosition valeurPosition = new ValeurPosition(valeur, positionPadding.position) ;
+        tableau.get(timestamp).inserer(valeurPosition);
+	paddingTimeStamp = Math.max(paddingTimeStamp, timestamp.length());
+    }
+
+    public Map<String, PositionPadding> getNomsObjets() {
+	return nomsObjets;
+    }
+
+    public Map<String, ListeChaineeOrdonnee<ValeurPosition>> getTableau() {
+	return tableau;
+    }
+    
+    public int getPaddingTimeStamp() {
+	return paddingTimeStamp;
+    }
+
+    public void setPaddingTimeStamp(int paddingTimeStamp) {
+	this.paddingTimeStamp = paddingTimeStamp;
     }
     
 }

@@ -13,7 +13,7 @@ public class FabriqueTraducteurOEBL extends FabriqueTraducteur {
         traduireLigne = (ligne, donnees, numLigne, config) -> {
             if (donnees != null) {
                 String [] evenement = donnees.split(SEPARATEUR) ;
-                lireValeur(evenement[0], evenement[1], evenement[2]);
+                tableauCSV.lireValeur(evenement[0], evenement[1], evenement[2]);
                 return ligne ;
             }
             return null ;

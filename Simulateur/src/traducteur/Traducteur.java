@@ -14,8 +14,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import simulateur.FabriqueSimulateur;
@@ -29,7 +27,7 @@ public abstract class Traducteur {
 
     public Traducteur(FabriqueTraducteur ft) {
 	this.ft = ft ;
-        ft.padding.add(Math.max("timestamp".length(), getTimeStamp().length())) ;
+        ft.tableauCSV.setPaddingTimeStamp(Math.max("timestamp".length(), getTimeStamp().length())) ;
     }
     
     /**
@@ -83,16 +81,9 @@ public abstract class Traducteur {
     
     public abstract boolean estOEBL () ;
     
-    public Map<String, Integer> getNomsObjets() {
-	return ft.nomsObjets;
-    }
     
-    public Map<String, ArrayList<String>> getTableau() {
-        return ft.tableau ;
-    }
-    
-    public ArrayList<Integer> getPadding() {
-        return ft.padding ;
+    public TableauCSV getTableauCSV() {
+        return ft.tableauCSV ;
     }
     
     public String getNomFichierOriginal() {

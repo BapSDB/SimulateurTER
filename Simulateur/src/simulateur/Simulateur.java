@@ -12,8 +12,12 @@ import java.util.Set;
 import exceptions.one_event_by_line.* ;
 import java.io.File;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map.Entry;
+import traducteur.TableauCSV.ListeChaineeOrdonnee;
+import traducteur.TableauCSV.ListeChaineeOrdonnee.ListeChaineeOrdonneeIterateur;
+import traducteur.TableauCSV.PositionPadding;
+import traducteur.TableauCSV.ValeurPosition;
 import traducteur.Traducteur;
 import util.StringUtil;
 import util.Util;
@@ -43,8 +47,8 @@ public final class Simulateur {
         String nomFichierCSV = CSV+Util.obtenirNomFichier(fs.traducteur.getNomFichierCSV());
 	if (!new File(nomFichierCSV).exists()) {
             
-            if (fs.traducteur.getNomsObjets().isEmpty()) {
-                System.out.println(fs.traducteur.getNomsObjets().size());
+            if (fs.traducteur.getTableauCSV().getNomsObjets().isEmpty()) {
+                System.out.println(fs.traducteur.getTableauCSV().getNomsObjets().size());
                 Simulateur simulateur = new FabriqueConfigurateur(fs.traducteur).creer().nouveauSimulateur().creer() ;
                 simulateur.ecrireFormatCSV();
                 
@@ -52,16 +56,25 @@ public final class Simulateur {
                 
                 System.out.println("Création de " + nomFichierCSV + " en cours...");
                 try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierCSV))) {
-                    bufferedWriter.write(StringUtil.centrer("timestamp", fs.traducteur.getPadding().get(0)) + Util.SEPARATEUR) ;
-                    Set<String> nomsObjets = fs.traducteur.getNomsObjets().keySet() ;
+                    bufferedWriter.write(StringUtil.centrer("timestamp", fs.traducteur.getTableauCSV().getPaddingTimeStamp()) + Util.SEPARATEUR) ;
+                    Set<String> nomsObjets = fs.traducteur.getTableauCSV().getNomsObjets().keySet() ;
                     int n = 0 ;
                     for (String nomObjet : nomsObjets)
-                        bufferedWriter.write(StringUtil.centrer(nomObjet, fs.traducteur.getPadding().get(n+1)) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
-                    for (Entry<String, ArrayList<String>> entrySet : fs.traducteur.getTableau().entrySet()) {
+                        bufferedWriter.write(StringUtil.centrer(nomObjet, fs.traducteur.getTableauCSV().getNomsObjets().get(nomObjet).getPadding()) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
+                    for (Entry<String, ListeChaineeOrdonnee<ValeurPosition>> entrySet : fs.traducteur.getTableauCSV().getTableau().entrySet()) {
                         n = 0 ;
-                        bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), fs.traducteur.getPadding().get(0)) + Util.SEPARATEUR);
-                        for (String valeur : entrySet.getValue())
-                            bufferedWriter.write(StringUtil.centrer(valeur != null ? valeur : "", fs.traducteur.getPadding().get(n+1)) + (++n < entrySet.getValue().size() ? Util.SEPARATEUR : "\n"));
+			Iterator<PositionPadding> positionPadding = fs.traducteur.getTableauCSV().getNomsObjets().values().iterator() ;
+			int padding ;
+                        bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), fs.traducteur.getTableauCSV().getPaddingTimeStamp()) + Util.SEPARATEUR);
+                        for (ListeChaineeOrdonneeIterateur<ValeurPosition> it = entrySet.getValue().iterator() ;  it.hasNext() ;) {
+			    ValeurPosition valeur = it.next() ;
+			    padding = positionPadding.next().getPadding() ;
+			    while(n < valeur.getPosition()) {
+				bufferedWriter.write(StringUtil.centrer("", padding) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n"));
+				padding = positionPadding.next().getPadding() ;
+			    }
+			    bufferedWriter.write(StringUtil.centrer(valeur.getValeur(), padding));
+			}
                     }
                     System.out.println("Traduction terminée --> création du fichier " + nomFichierCSV);
                 } catch (IOException ex) {

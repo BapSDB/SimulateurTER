@@ -8,8 +8,6 @@ import exceptions.traducteur.TraducteurFormatFichierInconnuException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import static simulateur.Simulateur.CSV;
 import static simulateur.Simulateur.OEBL;
 import traducteur.mqtt.FabriqueTraducteurMQTT;
@@ -48,11 +46,8 @@ public abstract class FabriqueTraducteur {
 	public String traduireLigne(String ligne, String donnees, int numLigne, BufferedWriter config) throws TimeStampException, IOException, LireDonneesException ;
     }
     
-    private final int NB_EVENEMENTS = 2 << 16 ;
     protected TraduireLigne traduireLigne ;
-    protected Map<String, Integer> nomsObjets = new LinkedHashMap<>();
-    protected Map<String, String[]> tableau = new LinkedHashMap<>(NB_EVENEMENTS);
-    protected int [] padding ;
+    protected TableauCSV tableauCSV = new TableauCSV() ;
 
     public FabriqueTraducteur(String nomFichierOriginal, String nomFichierOEBL, String nomFichierConfig, String nomFichierCSV) {
 	this.nomFichierOriginal = nomFichierOriginal;

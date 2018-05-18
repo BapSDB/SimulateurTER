@@ -1,7 +1,6 @@
 package configurateur;
 
 import exceptions.EntreeSortieException;
-import exceptions.LireDonneesException;
 import exceptions.config.ConfigFichierIntrouvableException;
 import exceptions.config.ConfigLireObjetsException;
 import exceptions.config.ConfigNomObjetException;
@@ -9,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import simulateur.FabriqueSimulateur;
+import traducteur.TableauCSV;
 
 public final class Configurateur {
     
@@ -30,7 +30,7 @@ public final class Configurateur {
         String nomObjet ;
         try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(fc.traducteur.getNomFichierConfig()))) {
             while ((nomObjet = lineNumberReader.readLine()) != null)
-                fc.traducteur.getNomsObjets().put(nomObjet, fc.traducteur.getNomsObjets().size());
+                fc.traducteur.getTableauCSV().getNomsObjets().put(nomObjet, new TableauCSV.PositionPadding(fc.traducteur.getTableauCSV().getNomsObjets().size(), nomObjet.length()));
         } catch (IOException ex) {
             throw new ConfigLireObjetsException(fc.traducteur.getNomFichierConfig()) ;
         }
