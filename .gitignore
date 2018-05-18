@@ -17,4 +17,6 @@ hs_err_pid*
 !/Simulateur
 !/Simulateur/src
 !/Simulateur/test
+!/Simulateur/build.xml
 /system-rules-1.17.0.jar
+/Simulateur/dist/
