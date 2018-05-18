@@ -13,6 +13,7 @@
 hs_err_pid*
 
 /Simulateur/*
+/Simulateur/src/ressources
 !/Simulateur
 !/Simulateur/src
 !/Simulateur/test
