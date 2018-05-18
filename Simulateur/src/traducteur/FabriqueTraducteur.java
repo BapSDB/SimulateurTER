@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import static simulateur.Simulateur.CSV;
 import static simulateur.Simulateur.OEBL;
 import traducteur.mqtt.FabriqueTraducteurMQTT;
@@ -83,18 +82,6 @@ public abstract class FabriqueTraducteur {
 		throw new TraducteurFormatFichierInconnuException(nomFichierOriginal) ;
 	}
 	
-    }
-    
-    protected void ecrireNomObjet (String nomObjet, BufferedWriter config) throws IOException {
-        if (!nomsObjets.containsKey(nomObjet)) {
-            nomsObjets.put(nomObjet, nomsObjets.size());
-            config.write(nomObjet+"\n");
-        }
-    }
-    
-    protected void lireValeur (String timestamp, String nomObjet, String valeur) {
-        tableau.putIfAbsent(timestamp, new String[]);
-        tableau.get(timestamp).put(nomsObjets.get(nomObjet), valeur) ;
     }
     
     public abstract Traducteur creer() ; 
