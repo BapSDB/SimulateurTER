@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
+import static simulateur.Simulateur.CSV;
+import static simulateur.Simulateur.OEBL;
 import traducteur.mqtt.FabriqueTraducteurMQTT;
 import traducteur.oebl.FabriqueTraducteurOEBL;
 import traducteur.sw2.FabriqueTraducteurSwitch2;
@@ -46,8 +49,11 @@ public abstract class FabriqueTraducteur {
 	public String traduireLigne(String ligne, String donnees, int numLigne, BufferedWriter config) throws TimeStampException, IOException, LireDonneesException ;
     }
     
+    private final int NB_EVENEMENTS = 2 << 16 ;
     protected TraduireLigne traduireLigne ;
-    protected Map<String,Integer> nomsObjets = new LinkedHashMap<>();
+    protected Map<String, Integer> nomsObjets = new LinkedHashMap<>();
+    protected Map<String, String[]> tableau = new LinkedHashMap<>(NB_EVENEMENTS);
+    protected int [] padding ;
 
     public FabriqueTraducteur(String nomFichierOriginal, String nomFichierOEBL, String nomFichierConfig, String nomFichierCSV) {
 	this.nomFichierOriginal = nomFichierOriginal;
@@ -62,9 +68,9 @@ public abstract class FabriqueTraducteur {
 	    throw new TraducteurFichierIntrouvableException(nomFichierOriginal);
 	
 	String [] cheminNomFichierExtension = Util.obtenirCheminNomFichierExtension(nomFichierOriginal) ;
-	String nomFichierOEBL = cheminNomFichierExtension[0] + cheminNomFichierExtension[1] + "oebl" ;
-	String nomFichierConfig = cheminNomFichierExtension[0] + cheminNomFichierExtension[1] + "config" ;
-	String nomFichierCSV = cheminNomFichierExtension[0] + cheminNomFichierExtension[1] + "csv" ;
+	String nomFichierOEBL = OEBL + cheminNomFichierExtension[1] + "oebl" ;
+	String nomFichierConfig = OEBL + cheminNomFichierExtension[1] + "config" ;
+	String nomFichierCSV = CSV + cheminNomFichierExtension[1] + "csv" ;
 	
 	switch (cheminNomFichierExtension[2]) {
 	    case "sw2" :
@@ -77,6 +83,18 @@ public abstract class FabriqueTraducteur {
 		throw new TraducteurFormatFichierInconnuException(nomFichierOriginal) ;
 	}
 	
+    }
+    
+    protected void ecrireNomObjet (String nomObjet, BufferedWriter config) throws IOException {
+        if (!nomsObjets.containsKey(nomObjet)) {
+            nomsObjets.put(nomObjet, nomsObjets.size());
+            config.write(nomObjet+"\n");
+        }
+    }
+    
+    protected void lireValeur (String timestamp, String nomObjet, String valeur) {
+        tableau.putIfAbsent(timestamp, new String[]);
+        tableau.get(timestamp).put(nomsObjets.get(nomObjet), valeur) ;
     }
     
     public abstract Traducteur creer() ; 

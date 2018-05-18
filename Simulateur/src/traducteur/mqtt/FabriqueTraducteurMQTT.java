@@ -11,7 +11,8 @@ import static traducteur.mqtt.TraducteurMQTT.SEPARATEUR;
 public class FabriqueTraducteurMQTT extends FabriqueTraducteur {
     
     public FabriqueTraducteurMQTT(String nomFichierOriginal, String nomFichierOEBL, String nomFichierConfig, String nomFichierCSV) {
-	super(nomFichierOriginal, nomFichierOEBL, nomFichierConfig, nomFichierCSV);
+	
+        super(nomFichierOriginal, nomFichierOEBL, nomFichierConfig, nomFichierCSV);
 	
 	traduireLigne = (String ligne, String donnees, int numLigne, BufferedWriter config) -> {
 	if (donnees != null) {
@@ -21,10 +22,8 @@ public class FabriqueTraducteurMQTT extends FabriqueTraducteur {
 	    strings = strings[1].substring(1,strings[1].length()-1).split(",") ;
 	    String nomObjet = (nomObjet = strings[1].split(":")[1]).substring(1, nomObjet.length()-1) ;
 	    String valeur = (valeur = strings[3].split(":")[1]).substring(1, valeur.length()-1) ;
-	    if (!nomsObjets.containsKey(nomObjet)) {
-		nomsObjets.put(nomObjet, nomsObjets.size());
-		config.write(nomObjet+"\n");
-	    }
+            ecrireNomObjet(nomObjet, config);
+            lireValeur(timestamp, nomObjet, valeur);
 	    return timestamp + Util.SEPARATEUR + nomObjet + Util.SEPARATEUR + valeur ;
 	}
 	return null ;

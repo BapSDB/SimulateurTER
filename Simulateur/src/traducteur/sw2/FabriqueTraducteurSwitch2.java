@@ -17,6 +17,7 @@ public class FabriqueTraducteurSwitch2 extends FabriqueTraducteur {
 	    if (donnees != null) {
 		String [] evenements = donnees.split(SEPARATEUR) ;
 		TimeStamp.verifierDate(evenements, nomFichierOriginal, numLigne);
+                lireValeur(evenements[0], evenements[2], evenements[3]);
 		return evenements[0] + Util.SEPARATEUR + evenements[2].substring(0, evenements[2].length()-1) + Util.SEPARATEUR + evenements[3] ;
 	    }
 	    return null ;

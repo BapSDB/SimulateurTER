@@ -10,38 +10,32 @@ public class GestionArbreRepertoires {
     
     static final TreeView<String> ARBRE_REPERTOIRES = new TreeView<>() ;
     
-    public static void createTree(File file, CheckBoxTreeItem<String> parent) {
-        if (file.isDirectory()) {
-            CheckBoxTreeItem<String> treeItem = new CheckBoxTreeItem<>(file.getName());
-            parent.getChildren().add(treeItem);
-            for (File f : file.listFiles()) {
-                createTree(f, treeItem);
-            }
-        } else {
-            parent.getChildren().add(new CheckBoxTreeItem<>(file.getName()));
-        }
+    @FunctionalInterface
+    private interface CreerArbre {
+        public void creerArbre (CreerArbre ca, File fichier, CheckBoxTreeItem<String> parent);
     }
     
-    public static void displayTreeView(String inputDirectoryLocation) {
+    public static void creerArbre(String nomRepertoireRacine) {
+        CreerArbre creerArbre = (ca, fichier, parent) -> {
+            if (fichier.isDirectory()) {
+                CheckBoxTreeItem<String> treeItem = new CheckBoxTreeItem<>(fichier.getName());
+                parent.getChildren().add(treeItem);
+                for (File f : fichier.listFiles()) {
+                    ca.creerArbre(ca, f, treeItem);
+                }
+            } else {
+                parent.getChildren().add(new CheckBoxTreeItem<>(fichier.getName()));
+            }
+        };
         
-        CheckBoxTreeItem<String> rootItem = new CheckBoxTreeItem<>(inputDirectoryLocation);
-
-        // Hides the root item of the tree view.
+        CheckBoxTreeItem<String> rootItem = new CheckBoxTreeItem<>(nomRepertoireRacine);
         ARBRE_REPERTOIRES.setShowRoot(false);
-
-        // Creates the cell factory.
         ARBRE_REPERTOIRES.setCellFactory(CheckBoxTreeCell.<String>forTreeView());
-
-        // Get a list of files.
-        File fileInputDirectoryLocation = new File(inputDirectoryLocation);
+        File fileInputDirectoryLocation = new File(nomRepertoireRacine);
         File fileList[] = fileInputDirectoryLocation.listFiles();
-
-        // create tree
         for (File file : fileList) {
-            createTree(file, rootItem);
+            creerArbre.creerArbre(creerArbre, file, rootItem);
         }
-
         ARBRE_REPERTOIRES.setRoot(rootItem);
     }
-    
 }

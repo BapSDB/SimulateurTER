@@ -6,15 +6,12 @@ import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
 import exceptions.config.ConfigEcrireObjetsException;
-import exceptions.traducteur.TraducteurTraiterFichierExceptions;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.regex.Pattern;
-import static simulateur.Simulateur.OEBL;
 import traducteur.Traducteur;
 import util.TimeStamp;
-import util.Util;
 
 public class TraducteurSwitch2 extends Traducteur {
     
@@ -38,7 +35,7 @@ public class TraducteurSwitch2 extends Traducteur {
     private static final String NOM_OBJET = "power:" ;
     private static final String VALEUR = "\\d+" ;
     private static final String UNITE = "W" ;
-    private static final Pattern PATTERN_SWITCH2 = Pattern.compile(TIMESTAMP+SEPARATEUR+ID+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR+SEPARATEUR+UNITE) ;
+    private static final Pattern PATTERN_SW2 = Pattern.compile(TIMESTAMP+SEPARATEUR+ID+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR+SEPARATEUR+UNITE) ;
 
     public TraducteurSwitch2(FabriqueTraducteurSwitch2 ft) {
 	super(ft);
@@ -46,7 +43,7 @@ public class TraducteurSwitch2 extends Traducteur {
     
     @Override
     public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
-	Util.traduireFormatOriginalVersFormatOEBL(PATTERN_SWITCH2, getTraduireLigne(), new TraducteurTraiterFichierExceptions(getNomFichierOriginal(), OEBL+Util.obtenirNomFichier(getNomFichierOEBL()), OEBL+Util.obtenirNomFichier(getNomFichierConfig())));
+        super.traduireFormatOriginalVersFormatOEBL() ;
 	try (BufferedWriter config = new BufferedWriter(new FileWriter(getNomFichierConfig()))) {
 	    config.write("power") ;
 	} catch (IOException ex) {
@@ -57,6 +54,21 @@ public class TraducteurSwitch2 extends Traducteur {
     @Override
     public boolean estOEBL() {
 	return false ;
+    }
+
+    @Override
+    public Pattern getPattern() {
+        return PATTERN_SW2 ;
+    }
+
+    @Override
+    public String getSeparateur() {
+        return SEPARATEUR ;
+    }
+    
+    @Override
+    public String getTimeStamp() {
+        return TIMESTAMP ;
     }
     
 }

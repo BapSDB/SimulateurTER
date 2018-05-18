@@ -1,16 +1,9 @@
 
 package traducteur.mqtt;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
-import exceptions.TimeStampException;
-import exceptions.traducteur.TraducteurTraiterFichierExceptions;
 import java.util.regex.Pattern;
 import traducteur.Traducteur;
 import util.TimeStamp;
-import util.Util;
-import static simulateur.Simulateur.OEBL;
 
 
 public class TraducteurMQTT extends Traducteur {
@@ -34,32 +27,30 @@ public class TraducteurMQTT extends Traducteur {
     private static final String NOM_OBJET = "\"name\":\"[A-Za-z]\\w*\"" ;
     private static final String TYPE = "\"operation\":\"[A-Za-z]\\w*\"" ;
     private static final String VALEUR = "\"message\":\"[\\w\\.]+\"" ;
-    private static final Pattern PATTERN_MQQT = Pattern.compile(TIMESTAMP+SEPARATEUR+"\\{"+TOPIC+","+NOM_OBJET+","+TYPE+","+VALEUR+"\\}") ;
+    private  static final Pattern PATTERN_MQQT = Pattern.compile(TIMESTAMP+SEPARATEUR+"\\{"+TOPIC+","+NOM_OBJET+","+TYPE+","+VALEUR+"\\}") ;
     
     public TraducteurMQTT(FabriqueTraducteurMQTT ft) {
 	super(ft);
     }
-
-    /**
-     *
-     * @throws FichierIntrouvableException
-     * @throws EntreeSortieException
-     * @throws LireDonneesException
-     * @throws TimeStampException
-     */
-    @Override
-    public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
-	Util.traduireFormatOriginalVersFormatOEBL(PATTERN_MQQT, getTraduireLigne(), new TraducteurTraiterFichierExceptions(getNomFichierOriginal(), OEBL+Util.obtenirNomFichier(getNomFichierOEBL()), OEBL+Util.obtenirNomFichier(getNomFichierConfig())));
-    }
-    
-    /*public static void main(String[] args) {
-        System.out.println("1440497603216 {\"topic\":\"/a4h/out/Presence_Lit/command\",\"name\":\"Presence_Lit\",\"operation\":\"command\",\"message\":\"OFF\"}".
-                replaceFirst(TIMESTAMP+SEPARATEUR+"\\{"+TOPIC+","+NOM_OBJET+","+TYPE+","+VALEUR+"\\}", "true"));
-    }*/
 
     @Override
     public boolean estOEBL() {
 	return false ;
     }
 
+    @Override
+    public Pattern getPattern() {
+        return PATTERN_MQQT ;
+    }
+
+    @Override
+    public String getSeparateur() {
+        return SEPARATEUR ;
+    }
+    
+    @Override
+    public String getTimeStamp() {
+        return TIMESTAMP ;
+    }
+    
 }

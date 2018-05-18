@@ -1,9 +1,8 @@
 package exceptions;
 
-import java.util.Arrays;
-
 public abstract class SimulateurException extends Exception {
     
+    private static final boolean MODE_DEBUG = true ;
     protected int codeErreur ;
 
     public SimulateurException() {
@@ -14,7 +13,10 @@ public abstract class SimulateurException extends Exception {
     }
     
     public void terminerExecutionSimulateur () {
-	printStackTrace(System.err);
+        if (MODE_DEBUG)
+            printStackTrace(System.err);
+        else
+            System.out.println(getMessage());
 	System.exit(codeErreur);
     }
     

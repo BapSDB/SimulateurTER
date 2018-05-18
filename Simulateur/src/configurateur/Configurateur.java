@@ -1,53 +1,18 @@
 package configurateur;
 
 import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
 import exceptions.config.ConfigFichierIntrouvableException;
+import exceptions.config.ConfigLireObjetsException;
 import exceptions.config.ConfigNomObjetException;
-import exceptions.config.ConfigTraiterFichierExceptions;
-import java.util.Set;
-import java.util.regex.Pattern;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import simulateur.FabriqueSimulateur;
-import static simulateur.Simulateur.OEBL;
-import util.Util;
 
 public final class Configurateur {
     
     private final FabriqueConfigurateur fc ;
-
-    public Configurateur(FabriqueConfigurateur fc) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	this.fc = fc ;
-	if (!fc.traducteur.Existe() && fc.traducteur.estOEBL()) {
-	    System.out.println("lol");
-	    lireObjets(fc.traducteur.getNomFichierConfig()) ;
-	}
-    }
-    
-    /**
-     * @return l'ensemble des noms d'objets
-     */
-    public Set<String> getNomsObjets() {
-	return fc.traducteur.getNomsObjets().keySet() ;
-    }
-    
-    /**
-     * 
-     * @param nomObjet
-     * Le nom d'objet pour lequel on souhaite retrouver l'indice de la valeur associée dans le {@link simulateur.Simulateur#tableau}
-     * @return l'indice de la valeur associée au nom d'objet passé en paramètre
-     */
-    public int getNomObjetVersIndice(String nomObjet) {
-	return fc.traducteur.getNomsObjets().get(nomObjet) ;
-    }
-
-    public String getNomFichierOEBL() {
-	return fc.traducteur.getNomFichierOEBL() ;
-    }
-    
-    public String getNomFichierCSV() {
-	return fc.traducteur.getNomFichierCSV() ;
-    }
     
     /**
      * Lit un fichier de configuration listant les objets utilisés dans la simulation
@@ -60,13 +25,19 @@ public final class Configurateur {
      * @throws EntreeSortieException
      * si une erreur d'entrée/sortie est apparue
      */
-    
-    public void lireObjets (String nomFichierEntree) throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	Util.lireDonnees(Pattern.compile("\\w+"), fc.ajouterElement, new ConfigTraiterFichierExceptions(OEBL+Util.obtenirNomFichier(nomFichierEntree)));
-    }
+    public Configurateur(FabriqueConfigurateur fc) throws ConfigFichierIntrouvableException, ConfigLireObjetsException {
+	this.fc = fc ;
+        String nomObjet ;
+        try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(fc.traducteur.getNomFichierConfig()))) {
+            while ((nomObjet = lineNumberReader.readLine()) != null)
+                fc.traducteur.getNomsObjets().put(nomObjet, fc.traducteur.getNomsObjets().size());
+        } catch (IOException ex) {
+            throw new ConfigLireObjetsException(fc.traducteur.getNomFichierConfig()) ;
+        }
+    }    
     
     public FabriqueSimulateur nouveauSimulateur () {
-	return new FabriqueSimulateur(this, fc.traducteur.Existe(), fc.traducteur.estOEBL()) ;
+	return new FabriqueSimulateur(fc.traducteur) ;
     }
     
 }

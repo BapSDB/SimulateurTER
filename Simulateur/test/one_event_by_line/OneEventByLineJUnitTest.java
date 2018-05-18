@@ -8,17 +8,12 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit ;
 
 
 public class OneEventByLineJUnitTest {
     
     //Configurateur configurateur ;
     //Simulateur simulateur ;
-    
-    @Rule
-    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
     
     public OneEventByLineJUnitTest() throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
 	//configurateur = new Configurateur("test/fichier_config/ressources/fichier_config.txt") ;

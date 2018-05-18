@@ -18,7 +18,7 @@ public class Vue extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Simulateur de traces");
-        GestionArbreRepertoires.displayTreeView("src/ressources/");
+        GestionArbreRepertoires.creerArbre("traces");
         BORDER_PANE.setCenter(ARBRE_REPERTOIRES);
         primaryStage.setScene(SCENE);
         primaryStage.show();

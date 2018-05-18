@@ -1,71 +1,34 @@
 package simulateur;
 
+import configurateur.FabriqueConfigurateur;
 import traducteur.FabriqueTraducteur;
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
 import exceptions.SimulateurException;
+import exceptions.config.ConfigFichierIntrouvableException;
+import exceptions.config.ConfigLireObjetsException;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.regex.Pattern;
 import java.util.Set;
 import exceptions.one_event_by_line.* ;
 import java.io.File;
-import java.util.Arrays;
+import java.nio.file.FileSystems;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 import traducteur.Traducteur;
 import util.StringUtil;
-import util.TimeStamp;
 import util.Util;
 
 public final class Simulateur {
     
     private final FabriqueSimulateur fs ;
-    public static final String RESSOURCES = "src/ressources/" ;
-    public static final String OEBL = RESSOURCES + "oebl/" ;
-    public static final String CSV = RESSOURCES + "csv/" ;
-    
-    // Définition des expressions régulières
-    // Pour l'analyse d'une ligne d'un fichier "one-event-by-line"
-    // Format attendu : timestamp ; objet ; value
-    // Lexèmes correspondants : TIMESTAMP SEPARATEUR NOM_OBJET SEPARATEUR VALEUR
-    // TIMESTAMP : HH:mm:ss
-    // SEPARATEUR : ";" par défaut pouvant être entouré par des blancs
-    // NOM_OBJET : une chaîne de caractères alphanumériques commençant par une lettre
-    // VALEUR : une chaîne de caractères alphanumériques
-    
-    private static final String TIMESTAMP = TimeStamp.FORMAT_UNSIGNED_LONG_LONG ;
-    private static final String BLANCS = "[^\\S\\n]*" ;
-            static final String SEPARATEUR = BLANCS + ";" + BLANCS ;
-    private static final String NOM_OBJET = "[A-Za-z]\\w*" ;
-    private static final String VALEUR = "[\\w\\.]+" ;
-    private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
+    private static final String JVM = new File(Simulateur.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent()
+            + FileSystems.getDefault().getSeparator() + ".." + FileSystems.getDefault().getSeparator() + "traces" ; 
+    public static final String TRACES = new File(System.getProperty("user.dir")).toPath().relativize(new File(JVM).toPath()) + FileSystems.getDefault().getSeparator() ;
+    public static final String OEBL = TRACES + "oebl" + FileSystems.getDefault().getSeparator() ;
+    public static final String CSV = TRACES + "csv" + FileSystems.getDefault().getSeparator() ;
     
     public Simulateur(FabriqueSimulateur fs) {
 	this.fs = fs ;
-    }
-    
-    /**
-     * Lit un fichier "one-event-by-line" et stocke ses données.<p>
-     * Format attendu par ligne : timestamp ; objet ; value
-     * @throws OneEventByLineFichierIntrouvableException
-     * si le fichier n'existe pas.<p>
-     * @throws OneEventByLineFormatException
-     * si une ligne du fichier ne correspond pas au format attendu.<p>
-     * @throws OneEventByLineNomObjetIntrouvableException
-     * si l'objet lue sur la ligne n'a pas été répertorié par le configurateur
-     * @throws OneEventByLineLireDonneesException
-     * si une erreur est apparue lors de la lecture du fichier OEBL 
-     * @since V0
-     * @see ecrireFormatCSV
-     */
-    
-    public void lireFormatOneEventByLine () throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
-	if (!fs.existe && fs.estOEBL) {
-	    System.out.println("lol");
-	    Util.lireDonnees(PATTERN_ONE_EVENT_BY_LINE, fs.ajouterElement, new OneEventByLineTraiterFichierExceptions(OEBL+Util.obtenirNomFichier(fs.configurateur.getNomFichierOEBL())));
-	}
     }
     
     /**
@@ -76,27 +39,39 @@ public final class Simulateur {
      * @see lireFormatOneEventByLine
      */
     
-    public void ecrireFormatCSV () throws OneEventByLineEcrireFormatCSVException {
-	if (!new File(CSV+Util.obtenirNomFichier(fs.configurateur.getNomFichierCSV())).exists()) {
-	    System.out.println("lol");
-	    System.out.println(Arrays.toString(fs.padding));
-	    try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(CSV+Util.obtenirNomFichier(fs.configurateur.getNomFichierCSV())))) {
-		bufferedWriter.write(StringUtil.centrer("timestamp", fs.padding[0]) + Util.SEPARATEUR) ;
-		Set<String> nomsObjets = fs.configurateur.getNomsObjets() ;
-		int n = 0 ;
-		for (String nomObjet : nomsObjets)
-		    bufferedWriter.write(StringUtil.centrer(nomObjet, fs.padding[n+1]) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
-		for (Entry<String, String[]> entrySet : fs.tableau.entrySet()) {
-		    n = 0 ;
-		    bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), fs.padding[0]) + Util.SEPARATEUR);
-		    for (String valeur : entrySet.getValue())
-			bufferedWriter.write(StringUtil.centrer(valeur != null ? valeur : "", fs.padding[n+1]) + (++n < entrySet.getValue().length ? Util.SEPARATEUR : "\n"));
-		}
-	    } catch (IOException ex) {
-		ex.printStackTrace(System.err);
-		throw new OneEventByLineEcrireFormatCSVException(CSV+Util.obtenirNomFichier(fs.configurateur.getNomFichierCSV())) ;
-	    }
+    public void ecrireFormatCSV () throws OneEventByLineEcrireFormatCSVException, ConfigFichierIntrouvableException, ConfigLireObjetsException, OneEventByLineLireDonneesException {
+        String nomFichierCSV = CSV+Util.obtenirNomFichier(fs.traducteur.getNomFichierCSV());
+	if (!new File(nomFichierCSV).exists()) {
+            
+            if (fs.traducteur.getNomsObjets().isEmpty()) {
+                System.out.println(fs.traducteur.getNomsObjets().size());
+                Simulateur simulateur = new FabriqueConfigurateur(fs.traducteur).creer().nouveauSimulateur().creer() ;
+                simulateur.ecrireFormatCSV();
+                
+            } else {
+                
+                System.out.println("Création de " + nomFichierCSV + " en cours...");
+                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierCSV))) {
+                    bufferedWriter.write(StringUtil.centrer("timestamp", fs.traducteur.getPadding().get(0)) + Util.SEPARATEUR) ;
+                    Set<String> nomsObjets = fs.traducteur.getNomsObjets().keySet() ;
+                    int n = 0 ;
+                    for (String nomObjet : nomsObjets)
+                        bufferedWriter.write(StringUtil.centrer(nomObjet, fs.traducteur.getPadding().get(n+1)) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
+                    for (Entry<String, ArrayList<String>> entrySet : fs.traducteur.getTableau().entrySet()) {
+                        n = 0 ;
+                        bufferedWriter.write(StringUtil.centrer(entrySet.getKey(), fs.traducteur.getPadding().get(0)) + Util.SEPARATEUR);
+                        for (String valeur : entrySet.getValue())
+                            bufferedWriter.write(StringUtil.centrer(valeur != null ? valeur : "", fs.traducteur.getPadding().get(n+1)) + (++n < entrySet.getValue().size() ? Util.SEPARATEUR : "\n"));
+                    }
+                    System.out.println("Traduction terminée --> création du fichier " + nomFichierCSV);
+                } catch (IOException ex) {
+                    ex.printStackTrace(System.err);
+                    throw new OneEventByLineEcrireFormatCSVException(nomFichierCSV) ;
+                }
+            }
 	}
+        else
+            System.out.println("Le fichier " + fs.traducteur.getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.");
     }
     
     private static void verifierArguments (String [] args) {
@@ -110,9 +85,7 @@ public final class Simulateur {
 	try {
 	    Traducteur traducteur = FabriqueTraducteur.nouvelleFabrique(nomFichierOriginal).creer() ;
 	    traducteur.appliquerTraduction();
-	    Simulateur simulateur = traducteur.nouvelleFabriqueConfigurateur().creer().nouveauSimulateur().creer() ;
-	    simulateur.lireFormatOneEventByLine();
-	    simulateur.ecrireFormatCSV();
+	    traducteur.nouvelleFabriqueSimulateur().creer().ecrireFormatCSV() ;
 	    //Util.execCommande(new String[]{"cat",traducteur.getNomFichierOEBL()});
 	    //Util.execCommande(new String[]{"cat", traducteur.getNomFichierCSV()});
 	} catch (SimulateurException ex) {
@@ -125,8 +98,8 @@ public final class Simulateur {
      */
     
     public static void main(String[] args) {
-	    verifierArguments(args);
-	    traduireFormatOriginalVersFormatCSV(args[0]);
+        verifierArguments(args);
+        traduireFormatOriginalVersFormatCSV(args[0]);
     }
     
 }
