@@ -35,7 +35,12 @@ public class TableauCSV {
 	public Integer getPosition() {
 	    return position;
 	}
-	
+
+	@Override
+	public String toString() {
+	    return "ValeurPosition{" + "valeur=" + valeur + ", position=" + position + '}';
+	}
+
     }
     
     public static class PositionPadding {

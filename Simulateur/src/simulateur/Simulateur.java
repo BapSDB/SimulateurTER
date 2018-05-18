@@ -62,6 +62,7 @@ public final class Simulateur {
                     for (String nomObjet : nomsObjets)
                         bufferedWriter.write(StringUtil.centrer(nomObjet, fs.traducteur.getTableauCSV().getNomsObjets().get(nomObjet).getPadding()) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
                     for (Entry<String, ListeChaineeOrdonnee<ValeurPosition>> entrySet : fs.traducteur.getTableauCSV().getTableau().entrySet()) {
+			System.out.println(entrySet.getValue());
                         n = 0 ;
 			Iterator<PositionPadding> positionPadding = fs.traducteur.getTableauCSV().getNomsObjets().values().iterator() ;
 			int padding ;
@@ -70,10 +71,11 @@ public final class Simulateur {
 			    ValeurPosition valeur = it.next() ;
 			    padding = positionPadding.next().getPadding() ;
 			    while(n < valeur.getPosition()) {
+				System.out.println(valeur.getPosition());
 				bufferedWriter.write(StringUtil.centrer("", padding) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n"));
 				padding = positionPadding.next().getPadding() ;
 			    }
-			    bufferedWriter.write(StringUtil.centrer(valeur.getValeur(), padding));
+			    bufferedWriter.write(StringUtil.centrer(valeur.getValeur(), padding) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n"));
 			}
                     }
                     System.out.println("Traduction terminée --> création du fichier " + nomFichierCSV);
