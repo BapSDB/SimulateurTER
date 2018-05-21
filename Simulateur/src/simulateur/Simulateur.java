@@ -14,6 +14,8 @@ import java.io.File;
 import java.nio.file.FileSystems;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import traducteur.TableauCSV.ListeChaineeOrdonnee;
 import traducteur.TableauCSV.ListeChaineeOrdonnee.ListeChaineeOrdonneeIterateur;
 import traducteur.TableauCSV.PositionPadding;
@@ -62,7 +64,6 @@ public final class Simulateur {
                     for (String nomObjet : nomsObjets)
                         bufferedWriter.write(StringUtil.centrer(nomObjet, fs.traducteur.getTableauCSV().getNomsObjets().get(nomObjet).getPadding()) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n")) ;
                     for (Entry<String, ListeChaineeOrdonnee<ValeurPosition>> entrySet : fs.traducteur.getTableauCSV().getTableau().entrySet()) {
-			System.out.println(entrySet.getValue());
                         n = 0 ;
 			Iterator<PositionPadding> positionPadding = fs.traducteur.getTableauCSV().getNomsObjets().values().iterator() ;
 			int padding ;
@@ -71,11 +72,18 @@ public final class Simulateur {
 			    ValeurPosition valeur = it.next() ;
 			    padding = positionPadding.next().getPadding() ;
 			    while(n < valeur.getPosition()) {
-				bufferedWriter.write(StringUtil.centrer("", padding) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n"));
+				bufferedWriter.write(StringUtil.centrer("", padding) + (n++ < nomsObjets.size() ? Util.SEPARATEUR : "\n"));
 				padding = positionPadding.next().getPadding() ;
 			    }
-			    bufferedWriter.write(StringUtil.centrer(valeur.getValeur(), padding) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n"));
+			    bufferedWriter.write(StringUtil.centrer(valeur.getValeur(), padding) + (n++ < nomsObjets.size() ? Util.SEPARATEUR : "\n"));
 			}
+                        positionPadding.forEachRemaining((pp) -> { 
+                            try {
+                                bufferedWriter.write(StringUtil.centrer("", pp.getPadding()) + (pp.getPosition() < nomsObjets.size() - 1 ? Util.SEPARATEUR : "\n"));
+                            } catch (IOException ex) {
+                                Logger.getLogger(Simulateur.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        });
                     }
                     System.out.println("Traduction terminée --> création du fichier " + nomFichierCSV);
                 } catch (IOException ex) {
