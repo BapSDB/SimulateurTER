@@ -6,6 +6,7 @@ import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
 import exceptions.traducteur.TraducteurFichierIntrouvableException;
+import exceptions.traducteur.TraducteurFormatDonneesIncorrectException;
 import exceptions.traducteur.TraducteurFormatFichierInconnuException;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,7 +24,7 @@ public abstract class FabriqueTraducteur {
     protected String nomFichierOEBL ;
     protected String nomFichierConfig ;
     protected String nomFichierCSV ;
-    protected final StringBuilder contenu = new StringBuilder() ;
+    protected final StringBuilder console = new StringBuilder() ;
     
     /**
      * Permet au {@link Traducteur} de spécifier la traduction d'une ligne d'un fichier
@@ -46,7 +47,7 @@ public abstract class FabriqueTraducteur {
 	 * @throws IOException
 	 * @throws LireDonneesException
 	 */
-	public String traduireLigne(String ligne, String donnees, int numLigne, BufferedWriter config) throws TimeStampException, IOException, LireDonneesException ;
+	public String traduireLigne(String ligne, String donnees, int numLigne, BufferedWriter config) throws TimeStampException, IOException, LireDonneesException, TraducteurFormatDonneesIncorrectException ;
     }
     
     protected TraduireLigne traduireLigne ;

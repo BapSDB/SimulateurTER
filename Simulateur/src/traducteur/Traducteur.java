@@ -41,16 +41,12 @@ public abstract class Traducteur {
 	String RacineOEBL = Util.obtenirNomFichier(ft.nomFichierOEBL) ;
 	String RacineConfig = Util.obtenirNomFichier(ft.nomFichierConfig) ;
 	if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
-	    System.out.println("Le fichier " + ft.nomFichierOriginal + " est en cours de traduction...") ;
-            ft.contenu.append("Le fichier ").append(ft.nomFichierOriginal).append(" est en cours de traduction...\n") ;
+            ft.console.append("Le fichier ").append(ft.nomFichierOriginal).append(" est en cours de traduction...\n") ;
 	    traduireFormatOriginalVersFormatOEBL();
-	    System.out.println("Traduction terminée --> création des fichiers " + OEBL+RacineOEBL + " et " + OEBL+RacineConfig) ;
-            ft.contenu.append("Traduction terminée --> création des fichiers ").append(OEBL).append(RacineOEBL).append(" et ").append(OEBL).append(RacineConfig).append("\n");
+            ft.console.append("Traduction terminée --> création des fichiers ").append(OEBL).append(RacineOEBL).append(" et ").append(OEBL).append(RacineConfig).append("\n");
 	}
-        else {
-            System.out.println("Le fichier " + ft.nomFichierOriginal + " existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.");
-            ft.contenu.append("Le fichier ").append(ft.nomFichierOriginal).append(" existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n");
-        }
+        else
+            ft.console.append("Le fichier ").append(ft.nomFichierOriginal).append(" existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n");
     }
     
     /**
@@ -106,8 +102,8 @@ public abstract class Traducteur {
 	return ft.nomFichierCSV;
     }
     
-    public StringBuilder getContenu() {
-	return ft.contenu ;
+    public StringBuilder getConsole() {
+	return ft.console ;
     }
     
     public boolean Existe() {

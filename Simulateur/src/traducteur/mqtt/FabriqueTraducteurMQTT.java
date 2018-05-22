@@ -5,6 +5,7 @@ import exceptions.EntreeSortieException;
 import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
+import exceptions.traducteur.TraducteurFormatDonneesIncorrectException;
 import java.io.BufferedWriter;
 import traducteur.FabriqueTraducteur;
 import traducteur.Traducteur;
@@ -30,7 +31,8 @@ public class FabriqueTraducteurMQTT extends FabriqueTraducteur {
             tableauCSV.lireValeur(timestamp, nomObjet, valeur);
 	    return timestamp + Util.SEPARATEUR + nomObjet + Util.SEPARATEUR + valeur ;
 	}
-	return null ;
+        else
+            throw new TraducteurFormatDonneesIncorrectException(ligne, numLigne, nomFichierOriginal) ;
     } ;
 	
     }

@@ -7,7 +7,7 @@ public class TraducteurFichierIntrouvableException extends FichierIntrouvableExc
 
     public TraducteurFichierIntrouvableException(String nomFichierOriginal) {
 	super("Le fichier à traduire \"" + nomFichierOriginal + "\" n'existe pas.", nomFichierOriginal);
-	codeErreur = 13 ;
+	codeErreur = 1 ;
     }
     
 }

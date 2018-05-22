@@ -20,6 +20,7 @@ public class Vue extends Application {
     
     static final Rectangle2D RECTANGLE = Screen.getPrimary().getBounds() ;
     static final BorderPane LEFT_BORDER_PANE = new BorderPane(ARBRE_REPERTOIRES);
+    static VueTableau FICHIER ;
     static final BorderPane RIGHT_BORDER_PANE = new BorderPane();
     static final VBox OPTIONS = new VBox() ;
     static final ScrollPane CONSOLE = new ScrollPane() ;
@@ -31,20 +32,30 @@ public class Vue extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        
         primaryStage.setTitle("Simulateur de traces") ;
+        
         GestionArbreRepertoires.creerArbre("traces") ;
+        
         SPLIT_PANE_VERTICAL_LEFT.setOrientation(Orientation.VERTICAL);
         SPLIT_PANE_VERTICAL_RIGHT.setOrientation(Orientation.VERTICAL);
         SPLIT_PANE_VERTICAL_LEFT.setMaxWidth(RECTANGLE.getWidth()*.2);
-        CONSOLE.setMaxHeight(RECTANGLE.getHeight()*.2);
+        
         String [] args = new String[1];
         getParameters().getRaw().toArray(args);
         verifierArguments(args);
         Simulateur simulateur = new Simulateur(FabriqueTraducteur.nouvelleFabrique(args[0]).creer()) ;
-        CONSOLE.setContent(new Text(simulateur.getTraducteur().getContenu().toString()));
+        
+        CONSOLE.setMaxHeight(RECTANGLE.getHeight()*.2);
+        CONSOLE.setContent(new Text(simulateur.getTraducteur().getConsole().toString()));
         CONSOLE.setFitToWidth(true);
         CONSOLE.setFitToHeight(true);
         CONSOLE.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        
+        FICHIER = new VueTableau(simulateur.getEntete(), simulateur.getContenu().toString()) ;
+        
+        RIGHT_BORDER_PANE.setCenter(FICHIER);
+        
         primaryStage.setScene(SCENE) ;
         primaryStage.show() ;
     }
