@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import simulateur.FabriqueSimulateur;
 import static simulateur.Simulateur.OEBL;
 import util.Util;
 
@@ -25,9 +24,10 @@ public abstract class Traducteur {
     protected final FabriqueTraducteur ft ;
     private boolean existe ;
 
-    public Traducteur(FabriqueTraducteur ft) {
+    public Traducteur(FabriqueTraducteur ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	this.ft = ft ;
-        ft.tableauCSV.setPaddingTimeStamp(Math.max("timestamp".length(), getTimeStamp().length())) ;
+        ft.tableauCSV.setPaddingTimeStamp(Math.max("timestamp".length(), 0)) ;
+        appliquerTraduction() ;
     }
     
     /**
@@ -37,16 +37,20 @@ public abstract class Traducteur {
      * @throws LireDonneesException
      * @throws TimeStampException 
      */
-    public void appliquerTraduction () throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    protected void appliquerTraduction () throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	String RacineOEBL = Util.obtenirNomFichier(ft.nomFichierOEBL) ;
 	String RacineConfig = Util.obtenirNomFichier(ft.nomFichierConfig) ;
 	if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
-	    System.out.println("Le fichier " + ft.nomFichierOriginal + " est en cours de traduction...");
+	    System.out.println("Le fichier " + ft.nomFichierOriginal + " est en cours de traduction...") ;
+            ft.contenu.append("Le fichier ").append(ft.nomFichierOriginal).append(" est en cours de traduction...\n") ;
 	    traduireFormatOriginalVersFormatOEBL();
 	    System.out.println("Traduction terminée --> création des fichiers " + OEBL+RacineOEBL + " et " + OEBL+RacineConfig) ;
+            ft.contenu.append("Traduction terminée --> création des fichiers ").append(OEBL).append(RacineOEBL).append(" et ").append(OEBL).append(RacineConfig).append("\n");
 	}
-        else
+        else {
             System.out.println("Le fichier " + ft.nomFichierOriginal + " existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.");
+            ft.contenu.append("Le fichier ").append(ft.nomFichierOriginal).append(" existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n");
+        }
     }
     
     /**
@@ -59,7 +63,7 @@ public abstract class Traducteur {
      * @throws TimeStampException
      * si un timestamp n'a pas pu être parsé ou est incohérent.
      */    
-    public void traduireFormatOriginalVersFormatOEBL() 
+    protected void traduireFormatOriginalVersFormatOEBL() 
 	    throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	String ligne ;
 	try (LineNumberReader  original = new LineNumberReader(new FileReader(ft.nomFichierOriginal)) ;
@@ -102,18 +106,16 @@ public abstract class Traducteur {
 	return ft.nomFichierCSV;
     }
     
+    public StringBuilder getContenu() {
+	return ft.contenu ;
+    }
+    
     public boolean Existe() {
 	return existe;
     }
     
     public abstract Pattern getPattern () ;
     
-    public abstract String getSeparateur( );
-    
-    public abstract String getTimeStamp () ;
-    
-    public FabriqueSimulateur nouvelleFabriqueSimulateur () {
-	return new FabriqueSimulateur(this) ;
-    }
+    public abstract String getSeparateur();
     
 }

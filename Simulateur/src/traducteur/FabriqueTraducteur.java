@@ -1,6 +1,8 @@
 
 package traducteur;
 
+import exceptions.EntreeSortieException;
+import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
 import exceptions.traducteur.TraducteurFichierIntrouvableException;
@@ -21,6 +23,7 @@ public abstract class FabriqueTraducteur {
     protected String nomFichierOEBL ;
     protected String nomFichierConfig ;
     protected String nomFichierCSV ;
+    protected final StringBuilder contenu = new StringBuilder() ;
     
     /**
      * Permet au {@link Traducteur} de spécifier la traduction d'une ligne d'un fichier
@@ -49,7 +52,7 @@ public abstract class FabriqueTraducteur {
     protected TraduireLigne traduireLigne ;
     protected TableauCSV tableauCSV = new TableauCSV() ;
 
-    public FabriqueTraducteur(String nomFichierOriginal, String nomFichierOEBL, String nomFichierConfig, String nomFichierCSV) {
+    protected FabriqueTraducteur(String nomFichierOriginal, String nomFichierOEBL, String nomFichierConfig, String nomFichierCSV) {
 	this.nomFichierOriginal = nomFichierOriginal;
 	this.nomFichierOEBL = nomFichierOEBL;
 	this.nomFichierConfig = nomFichierConfig;
@@ -79,6 +82,6 @@ public abstract class FabriqueTraducteur {
 	
     }
     
-    public abstract Traducteur creer() ; 
+    public abstract Traducteur creer() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException ; 
     
 }

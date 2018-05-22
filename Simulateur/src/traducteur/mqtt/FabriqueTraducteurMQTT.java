@@ -1,6 +1,10 @@
 
 package traducteur.mqtt;
 
+import exceptions.EntreeSortieException;
+import exceptions.FichierIntrouvableException;
+import exceptions.LireDonneesException;
+import exceptions.TimeStampException;
 import java.io.BufferedWriter;
 import traducteur.FabriqueTraducteur;
 import traducteur.Traducteur;
@@ -32,7 +36,7 @@ public class FabriqueTraducteurMQTT extends FabriqueTraducteur {
     }
 
     @Override
-    public Traducteur creer() {
+    public Traducteur creer() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	return new TraducteurMQTT(this) ;
     }
     

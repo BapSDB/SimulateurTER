@@ -1,6 +1,10 @@
 
 package traducteur.oebl;
 
+import exceptions.EntreeSortieException;
+import exceptions.FichierIntrouvableException;
+import exceptions.LireDonneesException;
+import exceptions.TimeStampException;
 import traducteur.FabriqueTraducteur;
 import traducteur.Traducteur;
 import static util.Util.SEPARATEUR;
@@ -21,7 +25,7 @@ public class FabriqueTraducteurOEBL extends FabriqueTraducteur {
     }
     
     @Override
-    public Traducteur creer() {
+    public Traducteur creer() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	return new TraducteurOEBL(this);
     }
     

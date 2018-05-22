@@ -7,7 +7,6 @@ import exceptions.config.ConfigNomObjetException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import simulateur.FabriqueSimulateur;
 import traducteur.TableauCSV;
 
 public final class Configurateur {
@@ -35,9 +34,5 @@ public final class Configurateur {
             throw new ConfigLireObjetsException(fc.traducteur.getNomFichierConfig()) ;
         }
     }    
-    
-    public FabriqueSimulateur nouveauSimulateur () {
-	return new FabriqueSimulateur(fc.traducteur) ;
-    }
     
 }

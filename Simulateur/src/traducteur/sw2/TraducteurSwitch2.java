@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.regex.Pattern;
+import traducteur.TableauCSV;
 import traducteur.Traducteur;
 import util.TimeStamp;
 
@@ -37,12 +38,13 @@ public class TraducteurSwitch2 extends Traducteur {
     private static final String UNITE = "W" ;
     private static final Pattern PATTERN_SW2 = Pattern.compile(TIMESTAMP+SEPARATEUR+ID+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR+SEPARATEUR+UNITE) ;
 
-    public TraducteurSwitch2(FabriqueTraducteurSwitch2 ft) {
+    public TraducteurSwitch2(FabriqueTraducteurSwitch2 ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	super(ft);
     }
     
     @Override
     public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+        getTableauCSV().getNomsObjets().put("power", new TableauCSV.PositionPadding(0, "power".length()));
         super.traduireFormatOriginalVersFormatOEBL() ;
 	try (BufferedWriter config = new BufferedWriter(new FileWriter(getNomFichierConfig()))) {
 	    config.write("power") ;
@@ -65,10 +67,5 @@ public class TraducteurSwitch2 extends Traducteur {
     public String getSeparateur() {
         return SEPARATEUR ;
     }
-    
-    @Override
-    public String getTimeStamp() {
-        return TIMESTAMP ;
-    }
-    
+
 }

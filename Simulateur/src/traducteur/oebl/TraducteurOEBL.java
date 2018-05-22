@@ -31,7 +31,7 @@ public class TraducteurOEBL extends Traducteur {
     private static final String VALEUR = "[\\w\\.]+" ;
     private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
 
-    public TraducteurOEBL(FabriqueTraducteurOEBL ft) {
+    public TraducteurOEBL(FabriqueTraducteurOEBL ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
 	super(ft);
     }
 
@@ -59,10 +59,5 @@ public class TraducteurOEBL extends Traducteur {
     public String getSeparateur() {
         return SEPARATEUR ;
     }
-    
-    @Override
-    public String getTimeStamp() {
-        return TIMESTAMP ;
-    }
-    
+
 }
