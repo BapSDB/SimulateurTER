@@ -6,6 +6,7 @@ import exceptions.FichierIntrouvableException;
 import exceptions.LireDonneesException;
 import exceptions.TimeStampException;
 import exceptions.traducteur.TraducteurFichierIntrouvableException;
+import exceptions.traducteur.TraducteurFormatDonneesIncorrectException;
 import exceptions.traducteur.TraducteurTraduireFichierOriginalVersFichierOEBLException;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -24,7 +25,7 @@ public abstract class Traducteur {
     protected final FabriqueTraducteur ft ;
     private boolean existe ;
 
-    public Traducteur(FabriqueTraducteur ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    public Traducteur(FabriqueTraducteur ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException, TraducteurFormatDonneesIncorrectException {
 	this.ft = ft ;
         ft.tableauCSV.setPaddingTimeStamp(Math.max("timestamp".length(), 0)) ;
         appliquerTraduction() ;
@@ -37,7 +38,7 @@ public abstract class Traducteur {
      * @throws LireDonneesException
      * @throws TimeStampException 
      */
-    protected void appliquerTraduction () throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    protected void appliquerTraduction () throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException, TraducteurFormatDonneesIncorrectException {
 	String RacineOEBL = Util.obtenirNomFichier(ft.nomFichierOEBL) ;
 	String RacineConfig = Util.obtenirNomFichier(ft.nomFichierConfig) ;
 	if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
@@ -60,7 +61,7 @@ public abstract class Traducteur {
      * si un timestamp n'a pas pu être parsé ou est incohérent.
      */    
     protected void traduireFormatOriginalVersFormatOEBL() 
-	    throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+	    throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException, TraducteurFormatDonneesIncorrectException {
 	String ligne ;
 	try (LineNumberReader  original = new LineNumberReader(new FileReader(ft.nomFichierOriginal)) ;
 		BufferedWriter oebl = new BufferedWriter(new FileWriter(ft.nomFichierOEBL)) ;

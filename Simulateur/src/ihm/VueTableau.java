@@ -14,9 +14,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 
 public class VueTableau extends TableView<ObservableList<String>> {
+
+    public VueTableau() {
+    }
+    
     public VueTableau(String [] entete, String contenu) {
         TableColumn<ObservableList<String>, String> colonne ;
         int i = 0 ;
@@ -39,27 +42,11 @@ public class VueTableau extends TableView<ObservableList<String>> {
         }
     }
 
-    private static class StringConverterOfString extends StringConverter<String> {
-
-        @Override
-        public String toString(String object) {
-            return object ;
-        }
-
-        @Override
-        public String fromString(String string) {
-            return string ;
-        }
-    }
-
     private static class CallbackImpl implements Callback<TableColumn<ObservableList<String>, String>, TableCell<ObservableList<String>, String>> {
-
-        public CallbackImpl() {
-        }
 
         @Override
         public TableCell<ObservableList<String>, String> call(TableColumn<ObservableList<String>, String> param) {
-            TextFieldTableCell<ObservableList<String>, String> textFieldTableCell = new TextFieldTableCell<>(new StringConverterOfString()) ;
+            TextFieldTableCell<ObservableList<String>, String> textFieldTableCell = new TextFieldTableCell<>() ;
             textFieldTableCell.setAlignment(Pos.CENTER);
             return textFieldTableCell ;
         }

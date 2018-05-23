@@ -1,7 +1,6 @@
 
 package ihm;
 
-import static ihm.GestionArbreRepertoires.ARBRE_REPERTOIRES;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
 import javafx.geometry.Rectangle2D;
@@ -14,11 +13,11 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import simulateur.Simulateur;
-import traducteur.FabriqueTraducteur;
 
 public class Vue extends Application {
     
     static final Rectangle2D RECTANGLE = Screen.getPrimary().getBounds() ;
+    static final ArbreRepertoires ARBRE_REPERTOIRES = new  ArbreRepertoires("traces") ;
     static final BorderPane LEFT_BORDER_PANE = new BorderPane(ARBRE_REPERTOIRES);
     static VueTableau FICHIER ;
     static final BorderPane RIGHT_BORDER_PANE = new BorderPane();
@@ -28,6 +27,7 @@ public class Vue extends Application {
     static final SplitPane SPLIT_PANE_VERTICAL_LEFT = new SplitPane(LEFT_BORDER_PANE, OPTIONS);
     static final SplitPane SPLIT_PANE_HORIZONTAL = new SplitPane(SPLIT_PANE_VERTICAL_LEFT, SPLIT_PANE_VERTICAL_RIGHT);
     static final Scene SCENE = new Scene(SPLIT_PANE_HORIZONTAL, RECTANGLE.getWidth(), RECTANGLE.getHeight());
+    static Simulateur SIMULATEUR ;
     
 
     @Override
@@ -35,25 +35,17 @@ public class Vue extends Application {
         
         primaryStage.setTitle("Simulateur de traces") ;
         
-        GestionArbreRepertoires.creerArbre("traces") ;
-        
         SPLIT_PANE_VERTICAL_LEFT.setOrientation(Orientation.VERTICAL);
         SPLIT_PANE_VERTICAL_RIGHT.setOrientation(Orientation.VERTICAL);
         SPLIT_PANE_VERTICAL_LEFT.setMaxWidth(RECTANGLE.getWidth()*.2);
         
-        String [] args = new String[1];
-        getParameters().getRaw().toArray(args);
-        verifierArguments(args);
-        Simulateur simulateur = new Simulateur(FabriqueTraducteur.nouvelleFabrique(args[0]).creer()) ;
-        
         CONSOLE.setMaxHeight(RECTANGLE.getHeight()*.2);
-        CONSOLE.setContent(new Text(simulateur.getTraducteur().getConsole().toString()));
+        CONSOLE.setContent(new Text());
         CONSOLE.setFitToWidth(true);
         CONSOLE.setFitToHeight(true);
         CONSOLE.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         
-        FICHIER = new VueTableau(simulateur.getEntete(), simulateur.getContenu().toString()) ;
-        
+        FICHIER = new VueTableau() ;
         RIGHT_BORDER_PANE.setCenter(FICHIER);
         
         primaryStage.setScene(SCENE) ;

@@ -42,11 +42,8 @@ public final class Simulateur {
         String nomFichierCSV = CSV+Util.obtenirNomFichier(traducteur.getNomFichierCSV()) ;
         
         try {
-            if (!new File(nomFichierCSV).exists()) {
+            if (!new File(nomFichierCSV).exists())
                 ecrireFormatCSV(nomFichierCSV);
-                //Util.execCommande(new String[]{"cat",traducteur.getNomFichierOEBL()});
-                //Util.execCommande(new String[]{"cat", traducteur.getNomFichierCSV()});
-            }
             else {
                 traducteur.getConsole().append("Le fichier ").append(traducteur.getNomFichierOEBL()).append(" existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.").append(nomFichierCSV).append("\n") ;
                 traducteur.getConsole().append("Chargement du fichier ").append(nomFichierCSV).append("...\n") ;
@@ -83,7 +80,7 @@ public final class Simulateur {
         traducteur.getConsole().append("Création de ").append(nomFichierCSV).append(" en cours...\n");
         String seqChar ;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierCSV))) {
-            seqChar = StringUtil.centrer("timestamp", traducteur.getTableauCSV().getPaddingTimeStamp()) + Util.SEPARATEUR ;
+            seqChar = StringUtil.centrer("Timestamp", traducteur.getTableauCSV().getPaddingTimeStamp()) + Util.SEPARATEUR ;
             bufferedWriter.write(seqChar);
             contenu.append(seqChar);
             Set<String> nomsObjets = traducteur.getTableauCSV().getNomsObjets().keySet() ;
