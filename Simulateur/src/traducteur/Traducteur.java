@@ -48,7 +48,8 @@ public abstract class Traducteur {
         
         ft.console.append("Le fichier ").append(ft.nomFichierOriginal).append(" existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n");
         
-        if (existe && !new File(CSV+RacineCSV).exists()) {
+        if (!existe && !new File(CSV+RacineCSV).exists()) {
+            System.out.println("LOOOOOOOL");
             Configurateur.lireFormatOEBL(this);
         }
     }

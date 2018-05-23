@@ -18,11 +18,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import traducteur.TableauCSV.ListeChaineeOrdonnee;
-import traducteur.TableauCSV.ListeChaineeOrdonnee.ListeChaineeOrdonneeIterateur;
 import traducteur.TableauCSV.PositionPadding;
 import traducteur.TableauCSV.ValeurPosition;
 import traducteur.Traducteur;
+import util.ListeChaineeOrdonnee;
+import util.ListeChaineeOrdonnee.ListeChaineeOrdonneeIterateur;
 import util.StringUtil;
 import util.Util;
 
@@ -84,9 +84,9 @@ public final class Simulateur {
         String seqChar ;
         entete = new ArrayList<>(traducteur.getTableauCSV().getNomsObjets().size() + 1) ;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierCSV))) {
-            seqChar = StringUtil.centrer("Timestamp", traducteur.getTableauCSV().getPaddingTimeStamp()) + Util.SEPARATEUR ;
-            entete.add("Timestamp");
-            bufferedWriter.write(seqChar);
+            seqChar = StringUtil.centrer("Timestamp", traducteur.getTableauCSV().getPaddingTimeStamp()) ;
+            entete.add(seqChar);
+            bufferedWriter.write(seqChar + Util.SEPARATEUR);
             Set<String> nomsObjets = traducteur.getTableauCSV().getNomsObjets().keySet() ;
             int n = 0 ;
             for (String nomObjet : nomsObjets) {
