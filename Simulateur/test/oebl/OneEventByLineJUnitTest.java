@@ -1,9 +1,7 @@
 
-package one_event_by_line;
+package oebl;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
+import exceptions.SimulateurException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,7 +13,7 @@ public class OneEventByLineJUnitTest {
     //Configurateur configurateur ;
     //Simulateur simulateur ;
     
-    public OneEventByLineJUnitTest() throws FichierIntrouvableException, LireDonneesException, EntreeSortieException {
+    public OneEventByLineJUnitTest() throws SimulateurException {
 	//configurateur = new Configurateur("test/fichier_config/ressources/fichier_config.txt") ;
     }
     

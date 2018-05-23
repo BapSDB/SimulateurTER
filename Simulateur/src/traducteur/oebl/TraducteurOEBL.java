@@ -1,10 +1,7 @@
 
 package traducteur.oebl;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
-import exceptions.TimeStampException;
+import exceptions.SimulateurException;
 import exceptions.traducteur.TraducteurTraduireFichierOriginalVersFichierOEBLException;
 import java.io.File;
 import java.io.IOException;
@@ -31,12 +28,12 @@ public class TraducteurOEBL extends Traducteur {
     private static final String VALEUR = "[\\w\\.]+" ;
     private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
 
-    public TraducteurOEBL(FabriqueTraducteurOEBL ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    public TraducteurOEBL(FabriqueTraducteurOEBL ft) throws SimulateurException {
 	super(ft);
     }
 
     @Override
-    public void appliquerTraduction() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    public void appliquerTraduction() throws SimulateurException {
         super.appliquerTraduction();
         try {
             Files.delete(new File(getNomFichierOriginal()).toPath());
@@ -45,11 +42,6 @@ public class TraducteurOEBL extends Traducteur {
         }
     }
     
-    @Override
-    public boolean estOEBL() {
-	return true ;
-    }
-
     @Override
     public Pattern getPattern() {
         return PATTERN_ONE_EVENT_BY_LINE ;

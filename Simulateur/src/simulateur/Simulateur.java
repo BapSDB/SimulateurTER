@@ -3,17 +3,20 @@ package simulateur;
 import exceptions.SimulateurException;
 import exceptions.config.ConfigFichierIntrouvableException;
 import exceptions.config.ConfigLireObjetsException;
+import exceptions.oebl.OEBLEcrireDonneesFormatCSVException;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Set;
-import exceptions.one_event_by_line.* ;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.nio.file.FileSystems;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import traducteur.TableauCSV.ListeChaineeOrdonnee;
 import traducteur.TableauCSV.ListeChaineeOrdonnee.ListeChaineeOrdonneeIterateur;
@@ -32,7 +35,7 @@ public final class Simulateur {
     public static final String OEBL = TRACES + "oebl" + FileSystems.getDefault().getSeparator() ;
     public static final String CSV = TRACES + "csv" + FileSystems.getDefault().getSeparator() ;
     
-    private String[] entete;
+    private List<String> entete;
     private final StringBuilder contenu = new StringBuilder() ;
     
     public Simulateur(Traducteur traducteur) {
@@ -58,7 +61,7 @@ public final class Simulateur {
     private void lireFormatCSV (String nomFichierCSV) throws ConfigFichierIntrouvableException, ConfigLireObjetsException {
         String ligne ;
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(nomFichierCSV))) {
-            entete = bufferedReader.readLine().split(";") ;
+            entete = new ArrayList<>(Arrays.asList(bufferedReader.readLine().split(";"))) ;
             while ((ligne = bufferedReader.readLine()) != null)
                 contenu.append(ligne).append("\n");
         } catch (FileNotFoundException ex) {
@@ -70,25 +73,26 @@ public final class Simulateur {
     
     /**
      * Ecrit dans un fichier au format CSV les données sous une forme tabulaire
-     * @throws OneEventByLineEcrireFormatCSVException
+     * @throws OEBLEcrireFormatCSVException
      * si une erreur est apparue lors de l'écriture du fichier
      * @since V1
      * @see lireFormatOneEventByLine
      */
     
-    public void ecrireFormatCSV (String nomFichierCSV) throws OneEventByLineEcrireFormatCSVException, ConfigFichierIntrouvableException, ConfigLireObjetsException, OneEventByLineLireDonneesException {
+    public void ecrireFormatCSV (String nomFichierCSV) throws SimulateurException {
         traducteur.getConsole().append("Création de ").append(nomFichierCSV).append(" en cours...\n");
         String seqChar ;
+        entete = new ArrayList<>(traducteur.getTableauCSV().getNomsObjets().size() + 1) ;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierCSV))) {
             seqChar = StringUtil.centrer("Timestamp", traducteur.getTableauCSV().getPaddingTimeStamp()) + Util.SEPARATEUR ;
+            entete.add("Timestamp");
             bufferedWriter.write(seqChar);
-            contenu.append(seqChar);
             Set<String> nomsObjets = traducteur.getTableauCSV().getNomsObjets().keySet() ;
             int n = 0 ;
             for (String nomObjet : nomsObjets) {
                 seqChar = StringUtil.centrer(nomObjet, traducteur.getTableauCSV().getNomsObjets().get(nomObjet).getPadding()) + (++n < nomsObjets.size() ? Util.SEPARATEUR : "\n") ;
+                entete.add(seqChar);
                 bufferedWriter.write(seqChar) ;
-                contenu.append(seqChar) ;
             }
             for (Entry<String, ListeChaineeOrdonnee<ValeurPosition>> entrySet : traducteur.getTableauCSV().getTableau().entrySet()) {
                 n = 0 ;
@@ -120,7 +124,7 @@ public final class Simulateur {
             traducteur.getConsole().append("Traduction terminée --> création du fichier ").append(nomFichierCSV).append("\n");
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
-            throw new OneEventByLineEcrireFormatCSVException(nomFichierCSV) ;
+            throw new OEBLEcrireDonneesFormatCSVException(nomFichierCSV) ;
         }
     }
 
@@ -132,7 +136,7 @@ public final class Simulateur {
         this.traducteur = traducteur;
     }
 
-    public String[] getEntete() {
+    public List<String> getEntete() {
         return entete;
     }
     

@@ -1,17 +1,18 @@
 package configurateur;
 
-import exceptions.EntreeSortieException;
 import exceptions.config.ConfigFichierIntrouvableException;
 import exceptions.config.ConfigLireObjetsException;
 import exceptions.config.ConfigNomObjetException;
+import exceptions.oebl.OEBLFichierIntrouvableException;
+import exceptions.oebl.OEBLLireDonneesException;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import traducteur.TableauCSV;
+import traducteur.Traducteur;
 
 public final class Configurateur {
-    
-    private final FabriqueConfigurateur fc ;
     
     /**
      * Lit un fichier de configuration listant les objets utilisés dans la simulation
@@ -24,15 +25,36 @@ public final class Configurateur {
      * @throws EntreeSortieException
      * si une erreur d'entrée/sortie est apparue
      */
-    public Configurateur(FabriqueConfigurateur fc) throws ConfigFichierIntrouvableException, ConfigLireObjetsException {
-	this.fc = fc ;
+    
+    private static void lireFichierConfig(Traducteur traducteur) throws ConfigFichierIntrouvableException, ConfigLireObjetsException {
         String nomObjet ;
-        try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(fc.traducteur.getNomFichierConfig()))) {
+        try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(traducteur.getNomFichierConfig()))) {
             while ((nomObjet = lineNumberReader.readLine()) != null)
-                fc.traducteur.getTableauCSV().getNomsObjets().put(nomObjet, new TableauCSV.PositionPadding(fc.traducteur.getTableauCSV().getNomsObjets().size(), nomObjet.length()));
+                traducteur.getTableauCSV().getNomsObjets().put(nomObjet, new TableauCSV.PositionPadding(traducteur.getTableauCSV().getNomsObjets().size(), nomObjet.length()));
+        } catch (FileNotFoundException ex) {
+            throw new ConfigFichierIntrouvableException(traducteur.getNomFichierConfig()) ;
         } catch (IOException ex) {
-            throw new ConfigLireObjetsException(fc.traducteur.getNomFichierConfig()) ;
+            throw new ConfigLireObjetsException(traducteur.getNomFichierConfig()) ;
+        }
+    }
+    
+    private static void lireFichierOEBL(Traducteur traducteur) throws OEBLFichierIntrouvableException, OEBLLireDonneesException {
+        String ligne ;
+        try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(traducteur.getNomFichierOEBL()))) {
+            while ((ligne = lineNumberReader.readLine()) != null) {
+                String [] evenement = ligne.split("[^\\S\n]*;[^\\S\n]*");
+                traducteur.getTableauCSV().lireValeur(evenement[0], evenement[1], evenement[2]) ;
+            }
+        } catch (FileNotFoundException ex) {
+            throw new OEBLFichierIntrouvableException(traducteur.getNomFichierOEBL()) ;
+        } catch (IOException ex) {
+            throw new OEBLLireDonneesException(traducteur.getNomFichierOEBL()) ;
         }
     }    
+
+    public static void lireFormatOEBL(Traducteur traducteur) throws ConfigFichierIntrouvableException, ConfigLireObjetsException, OEBLFichierIntrouvableException, OEBLLireDonneesException {
+        lireFichierConfig(traducteur);
+        lireFichierOEBL(traducteur);
+    }
     
 }

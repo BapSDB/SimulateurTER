@@ -1,12 +1,9 @@
 
 package traducteur;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
-import exceptions.TimeStampException;
+import configurateur.Configurateur;
+import exceptions.SimulateurException;
 import exceptions.traducteur.TraducteurFichierIntrouvableException;
-import exceptions.traducteur.TraducteurFormatDonneesIncorrectException;
 import exceptions.traducteur.TraducteurTraduireFichierOriginalVersFichierOEBLException;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,15 +14,15 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import static simulateur.Simulateur.CSV;
 import static simulateur.Simulateur.OEBL;
 import util.Util;
 
 public abstract class Traducteur {
     
     protected final FabriqueTraducteur ft ;
-    private boolean existe ;
 
-    public Traducteur(FabriqueTraducteur ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException, TraducteurFormatDonneesIncorrectException {
+    public Traducteur(FabriqueTraducteur ft) throws SimulateurException  {
 	this.ft = ft ;
         ft.tableauCSV.setPaddingTimeStamp(Math.max("timestamp".length(), 0)) ;
         appliquerTraduction() ;
@@ -38,16 +35,22 @@ public abstract class Traducteur {
      * @throws LireDonneesException
      * @throws TimeStampException 
      */
-    protected void appliquerTraduction () throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException, TraducteurFormatDonneesIncorrectException {
+    protected void appliquerTraduction () throws SimulateurException {
 	String RacineOEBL = Util.obtenirNomFichier(ft.nomFichierOEBL) ;
 	String RacineConfig = Util.obtenirNomFichier(ft.nomFichierConfig) ;
+        String RacineCSV = Util.obtenirNomFichier(ft.nomFichierCSV) ;
+        boolean existe ;
 	if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
             ft.console.append("Le fichier ").append(ft.nomFichierOriginal).append(" est en cours de traduction...\n") ;
 	    traduireFormatOriginalVersFormatOEBL();
             ft.console.append("Traduction terminée --> création des fichiers ").append(OEBL).append(RacineOEBL).append(" et ").append(OEBL).append(RacineConfig).append("\n");
 	}
-        else
-            ft.console.append("Le fichier ").append(ft.nomFichierOriginal).append(" existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n");
+        
+        ft.console.append("Le fichier ").append(ft.nomFichierOriginal).append(" existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n");
+        
+        if (existe && !new File(CSV+RacineCSV).exists()) {
+            Configurateur.lireFormatOEBL(this);
+        }
     }
     
     /**
@@ -60,8 +63,7 @@ public abstract class Traducteur {
      * @throws TimeStampException
      * si un timestamp n'a pas pu être parsé ou est incohérent.
      */    
-    protected void traduireFormatOriginalVersFormatOEBL() 
-	    throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException, TraducteurFormatDonneesIncorrectException {
+    protected void traduireFormatOriginalVersFormatOEBL() throws SimulateurException {
 	String ligne ;
 	try (LineNumberReader  original = new LineNumberReader(new FileReader(ft.nomFichierOriginal)) ;
 		BufferedWriter oebl = new BufferedWriter(new FileWriter(ft.nomFichierOEBL)) ;
@@ -79,9 +81,6 @@ public abstract class Traducteur {
 	    throw new TraducteurTraduireFichierOriginalVersFichierOEBLException(ft.nomFichierOriginal, ft.nomFichierOEBL, ft.nomFichierConfig) ;
 	}
     }
-    
-    public abstract boolean estOEBL () ;
-    
     
     public TableauCSV getTableauCSV() {
         return ft.tableauCSV ;
@@ -107,12 +106,8 @@ public abstract class Traducteur {
 	return ft.console ;
     }
     
-    public boolean Existe() {
-	return existe;
-    }
-    
     public abstract Pattern getPattern () ;
     
     public abstract String getSeparateur();
-    
+
 }

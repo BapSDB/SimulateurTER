@@ -1,12 +1,11 @@
 
 package traducteur.mqtt;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
-import exceptions.TimeStampException;
+import exceptions.SimulateurException;
+import exceptions.config.ConfigEcrireObjetsException;
 import exceptions.traducteur.TraducteurFormatDonneesIncorrectException;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import traducteur.FabriqueTraducteur;
 import traducteur.Traducteur;
 import util.TimeStamp;
@@ -27,7 +26,11 @@ public class FabriqueTraducteurMQTT extends FabriqueTraducteur {
 	    strings = strings[1].substring(1,strings[1].length()-1).split(",") ;
 	    String nomObjet = (nomObjet = strings[1].split(":")[1]).substring(1, nomObjet.length()-1) ;
 	    String valeur = (valeur = strings[3].split(":")[1]).substring(1, valeur.length()-1) ;
-            tableauCSV.ecrireNomObjet(nomObjet, config);
+            try {
+                tableauCSV.ecrireNomObjet(nomObjet, config);
+            } catch (IOException ex) {
+                throw new ConfigEcrireObjetsException(nomFichierConfig);
+            }
             tableauCSV.lireValeur(timestamp, nomObjet, valeur);
 	    return timestamp + Util.SEPARATEUR + nomObjet + Util.SEPARATEUR + valeur ;
 	}
@@ -38,7 +41,7 @@ public class FabriqueTraducteurMQTT extends FabriqueTraducteur {
     }
 
     @Override
-    public Traducteur creer() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    public Traducteur creer() throws SimulateurException {
 	return new TraducteurMQTT(this) ;
     }
     

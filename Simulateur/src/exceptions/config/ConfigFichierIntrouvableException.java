@@ -1,13 +1,13 @@
 
 package exceptions.config;
 
-import exceptions.FichierIntrouvableException;
+import exceptions.SimulateurException;
 
-public class ConfigFichierIntrouvableException extends FichierIntrouvableException {
+public class ConfigFichierIntrouvableException extends SimulateurException {
 
     public ConfigFichierIntrouvableException(String nomFichierConfig) {
-	super("\"Le fichier de configuration \"" + nomFichierConfig + "\" n'existe pas\"", nomFichierConfig);
-	codeErreur = 6 ;
+	super("\"Le fichier de configuration \"" + nomFichierConfig + "\" n'existe pas\"");
+	codeErreur = 10 ;
     }
     
 }

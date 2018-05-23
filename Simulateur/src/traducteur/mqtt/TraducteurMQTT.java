@@ -1,10 +1,7 @@
 
 package traducteur.mqtt;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
-import exceptions.TimeStampException;
+import exceptions.SimulateurException;
 import java.util.regex.Pattern;
 import traducteur.Traducteur;
 import util.TimeStamp;
@@ -33,13 +30,8 @@ public class TraducteurMQTT extends Traducteur {
     private static final String VALEUR = "\"message\":\"[\\w\\.]+\"" ;
     private  static final Pattern PATTERN_MQQT = Pattern.compile(TIMESTAMP+SEPARATEUR+"\\{"+TOPIC+","+NOM_OBJET+","+TYPE+","+VALEUR+"\\}") ;
     
-    public TraducteurMQTT(FabriqueTraducteurMQTT ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    public TraducteurMQTT(FabriqueTraducteurMQTT ft) throws SimulateurException {
 	super(ft);
-    }
-
-    @Override
-    public boolean estOEBL() {
-	return false ;
     }
 
     @Override

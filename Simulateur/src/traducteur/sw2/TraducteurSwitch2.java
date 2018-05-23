@@ -1,10 +1,7 @@
 
 package traducteur.sw2;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
-import exceptions.TimeStampException;
+import exceptions.SimulateurException;
 import exceptions.config.ConfigEcrireObjetsException;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -38,12 +35,12 @@ public class TraducteurSwitch2 extends Traducteur {
     private static final String UNITE = "W" ;
     private static final Pattern PATTERN_SW2 = Pattern.compile(TIMESTAMP+SEPARATEUR+ID+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR+SEPARATEUR+UNITE) ;
 
-    public TraducteurSwitch2(FabriqueTraducteurSwitch2 ft) throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    public TraducteurSwitch2(FabriqueTraducteurSwitch2 ft) throws SimulateurException {
 	super(ft);
     }
     
     @Override
-    public void traduireFormatOriginalVersFormatOEBL() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    public void traduireFormatOriginalVersFormatOEBL() throws SimulateurException {
         getTableauCSV().getNomsObjets().put("power", new TableauCSV.PositionPadding(0, "power".length()));
         super.traduireFormatOriginalVersFormatOEBL() ;
 	try (BufferedWriter config = new BufferedWriter(new FileWriter(getNomFichierConfig()))) {
@@ -53,11 +50,6 @@ public class TraducteurSwitch2 extends Traducteur {
 	}
     }
     
-    @Override
-    public boolean estOEBL() {
-	return false ;
-    }
-
     @Override
     public Pattern getPattern() {
         return PATTERN_SW2 ;

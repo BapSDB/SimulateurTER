@@ -3,6 +3,7 @@ package ihm;
 import java.io.BufferedReader;
 import java.io.CharArrayReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -20,7 +21,7 @@ public class VueTableau extends TableView<ObservableList<String>> {
     public VueTableau() {
     }
     
-    public VueTableau(String [] entete, String contenu) {
+    public VueTableau(List<String> entete, String contenu) {
         TableColumn<ObservableList<String>, String> colonne ;
         int i = 0 ;
         for (String donnee : entete) {

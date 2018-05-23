@@ -1,10 +1,7 @@
 
 package traducteur.sw2;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
-import exceptions.TimeStampException;
+import exceptions.SimulateurException;
 import java.io.BufferedWriter;
 import traducteur.FabriqueTraducteur;
 import traducteur.Traducteur;
@@ -30,7 +27,7 @@ public class FabriqueTraducteurSwitch2 extends FabriqueTraducteur {
     }
 
     @Override
-    public Traducteur creer() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException {
+    public Traducteur creer() throws SimulateurException {
 	return new TraducteurSwitch2(this) ;
     }
     

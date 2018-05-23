@@ -1,7 +1,7 @@
 
 package util;
 
-import exceptions.TimeStampException;
+import exceptions.SimulateurException;
 import exceptions.timestamp.TimeStampDateException;
 import exceptions.timestamp.TimeStampParseException;
 import java.text.ParseException;
@@ -65,12 +65,12 @@ public class TimeStamp {
 		    && (verifierMoisLong(date) || verifierMoisCourt(date) || verifierMoisFevier(date)) ;
     }
     
-    public static void verifierDate (long date, String nomFichierEntree, int numLigne) throws TimeStampException {
+    public static void verifierDate (long date, String nomFichierEntree, int numLigne) throws SimulateurException {
 	if(!new Date(date).before(new Date(System.currentTimeMillis())))
 		    throw new TimeStampDateException(nomFichierEntree, String.valueOf(date), numLigne);
     }
     
-    public static void verifierDate (String [] evenements, String nomFichierEntree, int numLigne) throws TimeStampException {
+    public static void verifierDate (String [] evenements, String nomFichierEntree, int numLigne) throws SimulateurException {
 	try {
 	    String [] date = evenements[0].split("-") ;
 	    date[2] = date[2].substring(0, 2) ;

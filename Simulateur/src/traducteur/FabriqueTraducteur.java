@@ -1,12 +1,8 @@
 
 package traducteur;
 
-import exceptions.EntreeSortieException;
-import exceptions.FichierIntrouvableException;
-import exceptions.LireDonneesException;
-import exceptions.TimeStampException;
+import exceptions.SimulateurException;
 import exceptions.traducteur.TraducteurFichierIntrouvableException;
-import exceptions.traducteur.TraducteurFormatDonneesIncorrectException;
 import exceptions.traducteur.TraducteurFormatFichierInconnuException;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,7 +43,7 @@ public abstract class FabriqueTraducteur {
 	 * @throws IOException
 	 * @throws LireDonneesException
 	 */
-	public String traduireLigne(String ligne, String donnees, int numLigne, BufferedWriter config) throws TimeStampException, IOException, LireDonneesException, TraducteurFormatDonneesIncorrectException ;
+	public String traduireLigne(String ligne, String donnees, int numLigne, BufferedWriter config) throws SimulateurException ;
     }
     
     protected TraduireLigne traduireLigne ;
@@ -60,7 +56,7 @@ public abstract class FabriqueTraducteur {
 	this.nomFichierCSV = nomFichierCSV;
     }
     
-    public static FabriqueTraducteur nouvelleFabrique (String nomFichierOriginal) throws TraducteurFichierIntrouvableException, TraducteurFormatFichierInconnuException {
+    public static FabriqueTraducteur nouvelleFabrique (String nomFichierOriginal) throws SimulateurException {
 	
 	if (!new File(nomFichierOriginal).exists())
 	    throw new TraducteurFichierIntrouvableException(nomFichierOriginal);
@@ -83,6 +79,6 @@ public abstract class FabriqueTraducteur {
 	
     }
     
-    public abstract Traducteur creer() throws FichierIntrouvableException, EntreeSortieException, LireDonneesException, TimeStampException ; 
+    public abstract Traducteur creer() throws SimulateurException ; 
     
 }
