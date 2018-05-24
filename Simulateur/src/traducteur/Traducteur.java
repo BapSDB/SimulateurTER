@@ -16,6 +16,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 import static simulateur.Simulateur.CSV;
 import static simulateur.Simulateur.OEBL;
+import static traducteur.FabriqueTraducteur.AFFICHAGE_BEAN;
 import util.Util;
 
 public abstract class Traducteur {
@@ -30,28 +31,24 @@ public abstract class Traducteur {
     
     /**
      * 
-     * @throws FichierIntrouvableException
-     * @throws EntreeSortieException
-     * @throws LireDonneesException
-     * @throws TimeStampException 
+     * @throws SimulateurException
      */
     protected void appliquerTraduction () throws SimulateurException {
 	String RacineOEBL = Util.obtenirNomFichier(ft.nomFichierOEBL) ;
 	String RacineConfig = Util.obtenirNomFichier(ft.nomFichierConfig) ;
         String RacineCSV = Util.obtenirNomFichier(ft.nomFichierCSV) ;
         boolean existe ;
-	if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
-            ft.console.append("Le fichier ").append(ft.nomFichierOriginal).append(" est en cours de traduction...\n") ;
+	
+        if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
+            AFFICHAGE_BEAN.setAffichage("Le fichier " + ft.nomFichierOriginal + " est en cours de traduction...\n") ;
 	    traduireFormatOriginalVersFormatOEBL();
-            ft.console.append("Traduction terminée --> création des fichiers ").append(OEBL).append(RacineOEBL).append(" et ").append(OEBL).append(RacineConfig).append("\n");
+            AFFICHAGE_BEAN.setAffichage("Traduction terminée --> création des fichiers " + OEBL + RacineOEBL + " et " + OEBL + RacineConfig + "\n") ;
 	}
         
-        ft.console.append("Le fichier ").append(ft.nomFichierOriginal).append(" existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n");
+        AFFICHAGE_BEAN.setAffichage("Le fichier " + ft.nomFichierOriginal + " existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n") ;
         
-        if (!existe && !new File(CSV+RacineCSV).exists()) {
-            System.out.println("LOOOOOOOL");
+        if (!existe && !new File(CSV+RacineCSV).exists())
             Configurateur.lireFormatOEBL(this);
-        }
     }
     
     /**
@@ -103,8 +100,8 @@ public abstract class Traducteur {
 	return ft.nomFichierCSV;
     }
     
-    public StringBuilder getConsole() {
-	return ft.console ;
+    public AffichageBean getAffichageBean() {
+	return AFFICHAGE_BEAN ;
     }
     
     public abstract Pattern getPattern () ;

@@ -4,6 +4,7 @@ package traducteur;
 import exceptions.SimulateurException;
 import exceptions.traducteur.TraducteurFichierIntrouvableException;
 import exceptions.traducteur.TraducteurFormatFichierInconnuException;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +21,7 @@ public abstract class FabriqueTraducteur {
     protected String nomFichierOEBL ;
     protected String nomFichierConfig ;
     protected String nomFichierCSV ;
-    protected final StringBuilder console = new StringBuilder() ;
+    protected static final AffichageBean AFFICHAGE_BEAN = new AffichageBean() ;
     
     /**
      * Permet au {@link Traducteur} de spécifier la traduction d'une ligne d'un fichier
@@ -56,11 +57,12 @@ public abstract class FabriqueTraducteur {
 	this.nomFichierCSV = nomFichierCSV;
     }
     
-    public static FabriqueTraducteur nouvelleFabrique (String nomFichierOriginal) throws SimulateurException {
+    public static FabriqueTraducteur nouvelleFabrique (String nomFichierOriginal, PropertyChangeListener listener) throws SimulateurException {
 	
 	if (!new File(nomFichierOriginal).exists())
 	    throw new TraducteurFichierIntrouvableException(nomFichierOriginal);
 	
+        AFFICHAGE_BEAN.addPropertyChangeListener(listener);
 	String [] cheminNomFichierExtension = Util.obtenirCheminNomFichierExtension(nomFichierOriginal) ;
 	String nomFichierOEBL = OEBL + cheminNomFichierExtension[1] + "oebl" ;
 	String nomFichierConfig = OEBL + cheminNomFichierExtension[1] + "config" ;

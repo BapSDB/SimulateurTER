@@ -48,14 +48,16 @@ public final class Simulateur {
             if (!new File(nomFichierCSV).exists())
                 ecrireFormatCSV(nomFichierCSV);
             else {
-                traducteur.getConsole().append("Le fichier ").append(traducteur.getNomFichierOEBL()).append(" existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.").append(nomFichierCSV).append("\n") ;
-                traducteur.getConsole().append("Chargement du fichier ").append(nomFichierCSV).append("...\n") ;
+                traducteur.getAffichageBean().setAffichage("Le fichier " + traducteur.getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.\n") ;
+                traducteur.getAffichageBean().setAffichage("Chargement du fichier " + nomFichierCSV + "...\n") ;
                 lireFormatCSV(nomFichierCSV);
-                traducteur.getConsole().append("Chargement terminé.\n");
             }
         } catch (SimulateurException ex) {
             ex.terminerExecutionSimulateur();
         }
+        
+        traducteur.getAffichageBean().setAffichage("Chargement terminé.\n");
+        this.traducteur.getAffichageBean().removeMyPropertyChangeListener();
     }
     
     private void lireFormatCSV (String nomFichierCSV) throws ConfigFichierIntrouvableException, ConfigLireObjetsException {
@@ -80,7 +82,7 @@ public final class Simulateur {
      */
     
     public void ecrireFormatCSV (String nomFichierCSV) throws SimulateurException {
-        traducteur.getConsole().append("Création de ").append(nomFichierCSV).append(" en cours...\n");
+        traducteur.getAffichageBean().setAffichage("Création de " + nomFichierCSV + " en cours...\n");
         String seqChar ;
         entete = new ArrayList<>(traducteur.getTableauCSV().getNomsObjets().size() + 1) ;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierCSV))) {
@@ -121,7 +123,7 @@ public final class Simulateur {
                     contenu.append(seqChar);
                 }
             }
-            traducteur.getConsole().append("Traduction terminée --> création du fichier ").append(nomFichierCSV).append("\n");
+            traducteur.getAffichageBean().setAffichage("Traduction terminée --> création du fichier " + nomFichierCSV + "\n");
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
             throw new OEBLEcrireDonneesFormatCSVException(nomFichierCSV) ;

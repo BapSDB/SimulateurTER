@@ -7,6 +7,8 @@ import exceptions.timestamp.TimeStampParseException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TimeStamp {
     
@@ -15,6 +17,7 @@ public class TimeStamp {
     public static final String FORMAT_DATE = "\\d{4}-\\d{2}-\\d{2}" ;
     public static final String FORMAT_DATE_HEURE = FORMAT_DATE + "_" + FORMAT_HEURE ;
     public static final int LONGUEUR_FORMAT_DATE_HEURE = "yyyy-MM-jj_HH:mm:ss".length() ;
+    private static final SimpleDateFormat TIMESTAMP_CONSOLE_FORMAT = new SimpleDateFormat("[HH:mm:ss] ") ;
     
     private static boolean verifierMoisLong (String [] date) {
 	boolean moisLong = false ;
@@ -81,12 +84,15 @@ public class TimeStamp {
 	}
     }
     
-    /*public static void main(String[] args) {
+    public static String getTimestampAffichageConsole () {
+        return TIMESTAMP_CONSOLE_FORMAT.format(new Date(System.currentTimeMillis())) ;
+    }
+    
+    public static void main(String[] args) {
 	try {
 	    System.out.println(verifierDate(new String[]{"2003", "04", "99"})) ;
 	} catch (ParseException ex) {
 	    Logger.getLogger(TimeStamp.class.getName()).log(Level.SEVERE, null, ex);
 	}
-    }*/
-    
+    }
 }
