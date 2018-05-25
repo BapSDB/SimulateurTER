@@ -27,7 +27,7 @@ public class TraducteurMQTT extends Traducteur {
     private static final String TOPIC = "\"topic\":\""+CHEMIN ;
     private static final String NOM_OBJET = "\"name\":\"[A-Za-z]\\w*\"" ;
     private static final String TYPE = "\"operation\":\"[A-Za-z]\\w*\"" ;
-    private static final String VALEUR = "\"message\":\"[\\w\\.]+\"" ;
+    private static final String VALEUR = "\"message\":\".+\"" ;
     private  static final Pattern PATTERN_MQQT = Pattern.compile(TIMESTAMP+SEPARATEUR+"\\{"+TOPIC+","+NOM_OBJET+","+TYPE+","+VALEUR+"\\}") ;
     
     public TraducteurMQTT(FabriqueTraducteurMQTT ft) throws SimulateurException {

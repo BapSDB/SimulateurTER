@@ -2,17 +2,14 @@
 package traducteur;
 
 import java.beans.*;
-import java.io.Serializable;
 
-public class AffichageBean implements Serializable {
+public class AffichageBean {
     
     public static final String PROPRIETE_AFFICHAGE = "affichage";
     
     private String affichage;
     
     private final PropertyChangeSupport propertySupport;
-    
-    private PropertyChangeListener listener ;
     
     public AffichageBean() {
         this.propertySupport = new PropertyChangeSupport(this);
@@ -30,16 +27,10 @@ public class AffichageBean implements Serializable {
     
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propertySupport.addPropertyChangeListener(listener);
-        this.listener = listener ;
     }
     
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         propertySupport.removePropertyChangeListener(listener);
-    }
-    
-    public void removeMyPropertyChangeListener () {
-        if (listener!= null)
-            removePropertyChangeListener(listener) ;
     }
     
 }

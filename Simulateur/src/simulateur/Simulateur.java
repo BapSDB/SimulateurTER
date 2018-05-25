@@ -4,6 +4,7 @@ import exceptions.SimulateurException;
 import exceptions.config.ConfigFichierIntrouvableException;
 import exceptions.config.ConfigLireObjetsException;
 import exceptions.oebl.OEBLEcrireDonneesFormatCSVException;
+import static traducteur.Traducteur.AFFICHAGE_BEAN;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -38,26 +39,23 @@ public final class Simulateur {
     private List<String> entete;
     private final StringBuilder contenu = new StringBuilder() ;
     
-    public Simulateur(Traducteur traducteur) {
-	
+    public Simulateur(Traducteur traducteur) throws SimulateurException {
         this.traducteur = traducteur ;
+        ecrireOulireFormatCSV();
+    }
+    
+    private void ecrireOulireFormatCSV () throws SimulateurException {
         
         String nomFichierCSV = CSV+Util.obtenirNomFichier(traducteur.getNomFichierCSV()) ;
-        
-        try {
-            if (!new File(nomFichierCSV).exists())
-                ecrireFormatCSV(nomFichierCSV);
-            else {
-                traducteur.getAffichageBean().setAffichage("Le fichier " + traducteur.getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.\n") ;
-                traducteur.getAffichageBean().setAffichage("Chargement du fichier " + nomFichierCSV + "...\n") ;
-                lireFormatCSV(nomFichierCSV);
-            }
-        } catch (SimulateurException ex) {
-            ex.terminerExecutionSimulateur();
+            
+        if (!new File(nomFichierCSV).exists())
+            ecrireFormatCSV(nomFichierCSV);
+        else {
+            AFFICHAGE_BEAN.setAffichage("Le fichier " + traducteur.getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.\n") ;
+            AFFICHAGE_BEAN.setAffichage("Chargement du fichier " + nomFichierCSV + "...\n") ;
+            lireFormatCSV(nomFichierCSV);
         }
-        
-        traducteur.getAffichageBean().setAffichage("Chargement terminé.\n");
-        this.traducteur.getAffichageBean().removeMyPropertyChangeListener();
+        AFFICHAGE_BEAN.setAffichage("Chargement terminé.\n");
     }
     
     private void lireFormatCSV (String nomFichierCSV) throws ConfigFichierIntrouvableException, ConfigLireObjetsException {
@@ -82,7 +80,7 @@ public final class Simulateur {
      */
     
     public void ecrireFormatCSV (String nomFichierCSV) throws SimulateurException {
-        traducteur.getAffichageBean().setAffichage("Création de " + nomFichierCSV + " en cours...\n");
+        AFFICHAGE_BEAN.setAffichage("Création de " + nomFichierCSV + " en cours...\n");
         String seqChar ;
         entete = new ArrayList<>(traducteur.getTableauCSV().getNomsObjets().size() + 1) ;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierCSV))) {
@@ -123,7 +121,7 @@ public final class Simulateur {
                     contenu.append(seqChar);
                 }
             }
-            traducteur.getAffichageBean().setAffichage("Traduction terminée --> création du fichier " + nomFichierCSV + "\n");
+            AFFICHAGE_BEAN.setAffichage("Traduction terminée --> création du fichier " + nomFichierCSV + "\n");
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
             throw new OEBLEcrireDonneesFormatCSVException(nomFichierCSV) ;

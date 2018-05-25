@@ -16,16 +16,15 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 import static simulateur.Simulateur.CSV;
 import static simulateur.Simulateur.OEBL;
-import static traducteur.FabriqueTraducteur.AFFICHAGE_BEAN;
 import util.Util;
 
 public abstract class Traducteur {
     
     protected final FabriqueTraducteur ft ;
+    public static final AffichageBean AFFICHAGE_BEAN = new AffichageBean() ;
 
     public Traducteur(FabriqueTraducteur ft) throws SimulateurException  {
 	this.ft = ft ;
-        ft.tableauCSV.setPaddingTimeStamp(Math.max("timestamp".length(), 0)) ;
         appliquerTraduction() ;
     }
     
@@ -38,7 +37,7 @@ public abstract class Traducteur {
 	String RacineConfig = Util.obtenirNomFichier(ft.nomFichierConfig) ;
         String RacineCSV = Util.obtenirNomFichier(ft.nomFichierCSV) ;
         boolean existe ;
-	
+	ft.tableauCSV.setPaddingTimeStamp(Math.max("timestamp".length(), 0)) ;
         if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
             AFFICHAGE_BEAN.setAffichage("Le fichier " + ft.nomFichierOriginal + " est en cours de traduction...\n") ;
 	    traduireFormatOriginalVersFormatOEBL();
@@ -47,8 +46,12 @@ public abstract class Traducteur {
         
         AFFICHAGE_BEAN.setAffichage("Le fichier " + ft.nomFichierOriginal + " existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n") ;
         
-        if (!existe && !new File(CSV+RacineCSV).exists())
+        if (!existe && !new File(CSV+RacineCSV).exists()) {
+            AFFICHAGE_BEAN.setAffichage("Le fichier " + getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.\n") ;
+            AFFICHAGE_BEAN.setAffichage("Chargement du fichier " + getNomFichierCSV() + "...\n") ;
             Configurateur.lireFormatOEBL(this);
+            AFFICHAGE_BEAN.setAffichage("Chargement terminé.\n");
+        }
     }
     
     /**
@@ -98,10 +101,6 @@ public abstract class Traducteur {
     
     public String getNomFichierCSV() {
 	return ft.nomFichierCSV;
-    }
-    
-    public AffichageBean getAffichageBean() {
-	return AFFICHAGE_BEAN ;
     }
     
     public abstract Pattern getPattern () ;

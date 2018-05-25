@@ -1,5 +1,7 @@
 package exceptions;
 
+import static traducteur.Traducteur.AFFICHAGE_BEAN;
+
 public abstract class SimulateurException extends Exception {
     
     private static final boolean MODE_DEBUG = true ;
@@ -18,6 +20,10 @@ public abstract class SimulateurException extends Exception {
         else
             System.out.println(getMessage());
 	System.exit(codeErreur);
+    }
+    
+    public void afficherMessageDansConsole () {
+       AFFICHAGE_BEAN.setAffichage(getMessage());
     }
     
 }
