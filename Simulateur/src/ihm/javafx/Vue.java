@@ -1,6 +1,7 @@
 
 package ihm.javafx;
 
+import static ihm.javafx.MessageEtape.setMessageEtape1;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javafx.application.Application;
@@ -17,13 +18,11 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import simulateur.Simulateur;
 import static traducteur.Traducteur.AFFICHAGE_BEAN;
 import static util.TimeStamp.getTimestampAffichageConsole;
 
 public class Vue extends Application {
     
-    static Simulateur simulateur ;
     static final VueTableau TABLEAU = new VueTableau() ;
     static final ArbreRepertoires ARBRE_REPERTOIRES = new ArbreRepertoires("traces") ;
     static final VBox PANNEAU_DE_COMMANDES = new VBox(new Multimedia(), new Options()) ;
@@ -87,7 +86,7 @@ public class Vue extends Application {
         primaryStage.setScene(SCENE) ;
         primaryStage.show() ;
         
-        TABLEAU.setMessageEtape1();
+        setMessageEtape1();
         ARBRE_REPERTOIRES.requestFocus();
     }
     

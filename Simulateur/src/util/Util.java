@@ -2,6 +2,7 @@ package util;
 
 public class Util {
     
+    public static final int NB_EVENEMENTS = 2 << 16 ;
     public static final String SEPARATEUR = " ; " ;
     
     private static String[] separerCheminNomFichier (String nomFichier) {

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import simulateur.Simulateur;
+import simulateur.Formateur;
 
 public class Exec {
     public static void execCommande (String [] cmd) {
@@ -19,12 +19,12 @@ public class Exec {
 		    while((line = br.readLine()) != null)
 			System.out.println(line);
 		} catch (IOException ex) {
-		    Logger.getLogger(Simulateur.class.getName()).log(Level.SEVERE, null, ex);
+		    Logger.getLogger(Formateur.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	    }).start();
 	    p.waitFor() ;
 	} catch (IOException | InterruptedException ex) {
-	    Logger.getLogger(Simulateur.class.getName()).log(Level.SEVERE, null, ex);
+	    Logger.getLogger(Formateur.class.getName()).log(Level.SEVERE, null, ex);
 	}
     }
 }

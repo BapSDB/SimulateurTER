@@ -1,5 +1,6 @@
 package simulateur;
 
+import strategie.Simulateur;
 import exceptions.SimulateurException;
 import exceptions.csv.CSVEcrireDonneesException;
 import exceptions.csv.CSVFichierIntrouvableException;
@@ -16,8 +17,8 @@ import java.io.FileReader;
 import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import traducteur.TableauCSV.PositionPadding;
 import traducteur.TableauCSV.ValeurPosition;
@@ -26,20 +27,26 @@ import util.ListeChaineeOrdonnee;
 import util.ListeChaineeOrdonnee.ListeChaineeOrdonneeIterateur;
 import util.StringUtil;
 import util.Util;
+import static util.Util.NB_EVENEMENTS;
 
-public final class Simulateur {
+public final class Formateur {
     
     private Traducteur traducteur ;
+    
+    private Collection<String> entete ;
+    private final Collection<Collection<String>> contenu = new ArrayList<>(NB_EVENEMENTS) ;
+    
     private static final String JVM = new File(Simulateur.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent()
             + FileSystems.getDefault().getSeparator() + ".." + FileSystems.getDefault().getSeparator() + "traces" ; 
     public static final String TRACES = new File(System.getProperty("user.dir")).toPath().relativize(new File(JVM).toPath()) + FileSystems.getDefault().getSeparator() ;
     public static final String OEBL = TRACES + "oebl" + FileSystems.getDefault().getSeparator() ;
     public static final String CSV = TRACES + "csv" + FileSystems.getDefault().getSeparator() ;
     
-    private List<String> entete;
-    private final StringBuilder contenu = new StringBuilder() ;
+    public static Formateur nouveauFormateur (Traducteur traducteur) throws SimulateurException {
+        return new Formateur(traducteur) ;
+    }
     
-    public Simulateur(Traducteur traducteur) throws SimulateurException {
+    private Formateur(Traducteur traducteur) throws SimulateurException {
         this.traducteur = traducteur ;
         ecrireOulireFormatCSV();
     }
@@ -63,7 +70,7 @@ public final class Simulateur {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(nomFichierCSV))) {
             entete = new ArrayList<>(Arrays.asList(bufferedReader.readLine().split(";"))) ;
             while ((ligne = bufferedReader.readLine()) != null)
-                contenu.append(ligne).append("\n");
+                contenu.add(new ArrayList<>(Arrays.asList(ligne.split(";"))));
         } catch (FileNotFoundException ex) {
             throw  new CSVFichierIntrouvableException(nomFichierCSV);
         } catch (IOException ex) {
@@ -100,26 +107,28 @@ public final class Simulateur {
                 int padding ;
                 seqChar = StringUtil.centrer(entrySet.getKey(), traducteur.getTableauCSV().getPaddingTimeStamp()) + Util.SEPARATEUR ;
                 bufferedWriter.write(seqChar);
-                contenu.append(seqChar);
+                ArrayList<String> donnees = new ArrayList<>(entete.size());
+                donnees.add(seqChar);
                 for (ListeChaineeOrdonneeIterateur<ValeurPosition> it = entrySet.getValue().iterator() ;  it.hasNext() ;) {
                     ValeurPosition valeur = it.next() ;
                     padding = positionPadding.next().getPadding() ;
                     while(n++ < valeur.getPosition()) {
                         seqChar = StringUtil.centrer("", padding) + (n < nomsObjets.size() ? Util.SEPARATEUR : "\n") ;
                         bufferedWriter.write(seqChar);
-                        contenu.append(seqChar);
+                        donnees.add(seqChar);
                         padding = positionPadding.next().getPadding() ;
                     }
                     seqChar = StringUtil.centrer(valeur.getValeur(), padding) + (n++ < nomsObjets.size() ? Util.SEPARATEUR : "\n") ;
                     bufferedWriter.write(seqChar);
-                    contenu.append(seqChar);
+                    donnees.add(seqChar);
                 }
                 for (; positionPadding.hasNext() ;) {
                     PositionPadding pp = positionPadding.next() ;
                     seqChar = StringUtil.centrer("", pp.getPadding()) + (pp.getPosition() < nomsObjets.size() - 1 ? Util.SEPARATEUR : "\n") ;
                     bufferedWriter.write(seqChar);
-                    contenu.append(seqChar);
+                    donnees.add(seqChar);
                 }
+                
             }
             AFFICHAGE_BEAN.setAffichage("Traduction terminée --> création du fichier " + nomFichierCSV + "\n");
         } catch (IOException ex) {
@@ -136,14 +145,10 @@ public final class Simulateur {
         this.traducteur = traducteur;
     }
 
-    public List<String> getEntete() {
-        return entete;
+    public Simulateur nouveauSimulateur () {
+        return new Simulateur(entete, contenu);
     }
-    
-    public StringBuilder getContenu() {
-        return contenu;
-    }
-    
+
     
     /**
      * @param args the command line arguments

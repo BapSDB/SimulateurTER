@@ -2,9 +2,8 @@
 package ihm.javafx;
 
 import exceptions.SimulateurException;
+import static ihm.javafx.MessageEtape.setMessageEtape2;
 import static ihm.javafx.Multimedia.CHARGER_FICHIER;
-import static ihm.javafx.Vue.PANNEAU_DE_COMMANDES;
-import static ihm.javafx.Vue.TABLEAU;
 import static ihm.javafx.Vue.fichierSélectionné;
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +61,7 @@ class Fichier extends HBox {
         }
         CHARGER_FICHIER.setSelected(false);
         CHARGER_FICHIER.setMouseTransparent(false);
-        TABLEAU.setMessageEtape2();
+        setMessageEtape2();
     }
 
     private class HandlerSourisSelectionFichier implements EventHandler<MouseEvent> {

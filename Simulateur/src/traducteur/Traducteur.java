@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import static simulateur.Simulateur.CSV;
-import static simulateur.Simulateur.OEBL;
+import static simulateur.Formateur.CSV;
+import static simulateur.Formateur.OEBL;
 import util.Util;
 
 public abstract class Traducteur {

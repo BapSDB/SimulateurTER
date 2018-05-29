@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import util.ListeChaineeOrdonnee;
+import static util.Util.NB_EVENEMENTS;
 
 public class TableauCSV {
     
@@ -60,7 +61,6 @@ public class TableauCSV {
 	
     }
     
-    private static final int NB_EVENEMENTS = 2 << 16 ;
     private final Map<String, PositionPadding> nomsObjets = new LinkedHashMap<>() ;
     private final Map<String, ListeChaineeOrdonnee<ValeurPosition>> tableau = new LinkedHashMap<>(NB_EVENEMENTS) ;
     private int paddingTimeStamp ;

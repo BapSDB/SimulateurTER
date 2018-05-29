@@ -1,9 +1,8 @@
 
 package ihm.javafx;
 
+import static ihm.javafx.Options.getIndiceRadioBoutonSelectionné;
 import static ihm.javafx.Vue.BORDER_PANE_PANNEAU;
-import ihm.javafx.HandlerSourisEntrée;
-import ihm.javafx.HandlerSourisSortie;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -65,37 +64,39 @@ public final class Multimedia extends GridPane {
         CHARGER_FICHIER.setOnAction(new HandlerChargerFichier());
         MULTIMEDIA[1].setOnAction(new HandlerLecture());
         MULTIMEDIA[3].setOnAction(new HandlerPause());
+        
     }
 
     private static class HandlerChargerFichier implements EventHandler<ActionEvent> {
-
-        public HandlerChargerFichier() {
-        }
-
+        
+        private int indice ;
+        
         @Override
         public void handle(ActionEvent event) {
-            if (CHARGER_FICHIER.isSelected()) {
-                
-                CHARGER_FICHIER.setSelected(true);
-                CHARGER_FICHIER.setMouseTransparent(true);
-                ProgressIndicator progressIndicatorTableau = new ProgressIndicator() ;
-                ProgressIndicator progressIndicatorArbre = new ProgressIndicator() ;
-                ProgressIndicator progressIndicatorPanneau = new ProgressIndicator() ;
-                TacheChargerFichier tâcheChargerFichier = new TacheChargerFichier() ;
-                progressIndicatorTableau.progressProperty().bind(tâcheChargerFichier.progressProperty());
-                progressIndicatorArbre.progressProperty().bind(tâcheChargerFichier.progressProperty());
-                progressIndicatorPanneau.progressProperty().bind(tâcheChargerFichier.progressProperty());
-                
-                Platform.runLater(() -> {
-                    BORDER_PANE_TABLEAU.setCenter(progressIndicatorTableau);
-                    BORDER_PANE_ARBRE.setCenter(progressIndicatorArbre);
-                    BORDER_PANE_PANNEAU.setCenter(progressIndicatorPanneau);
-                });
-                
-                new Thread(tâcheChargerFichier).start();
-                
-            }
+            if (CHARGER_FICHIER.isSelected())
+                chargerFichier(getIndiceRadioBoutonSelectionné()) ;
         }
+        
+        private void chargerFichier(int indice) {
+            CHARGER_FICHIER.setSelected(true);
+            CHARGER_FICHIER.setMouseTransparent(true);
+            ProgressIndicator progressIndicatorTableau = new ProgressIndicator() ;
+            ProgressIndicator progressIndicatorArbre = new ProgressIndicator() ;
+            ProgressIndicator progressIndicatorPanneau = new ProgressIndicator() ;
+            TacheChargerFichier tâcheChargerFichier = new TacheChargerFichier(indice) ;
+            progressIndicatorTableau.progressProperty().bind(tâcheChargerFichier.progressProperty());
+            progressIndicatorArbre.progressProperty().bind(tâcheChargerFichier.progressProperty());
+            progressIndicatorPanneau.progressProperty().bind(tâcheChargerFichier.progressProperty());
+
+            Platform.runLater(() -> {
+                BORDER_PANE_TABLEAU.setCenter(progressIndicatorTableau);
+                BORDER_PANE_ARBRE.setCenter(progressIndicatorArbre);
+                BORDER_PANE_PANNEAU.setCenter(progressIndicatorPanneau);
+            });
+
+            new Thread(tâcheChargerFichier).start();
+        }
+        
     }
 
     private class HandlerLecture implements EventHandler<ActionEvent> {

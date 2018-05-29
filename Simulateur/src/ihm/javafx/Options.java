@@ -1,20 +1,30 @@
 
 package ihm.javafx;
 
+import java.util.Collections;
 import javafx.geometry.Insets;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 
 public final class Options extends VBox {
     
     private static final RadioButton [] OPTIONS = new RadioButton[4] ;
-    private static final ToggleGroup TOGGLE_GROUP = new ToggleGroup();
+    static final ToggleGroup TOGGLE_GROUP_OPTIONS = new ToggleGroup();
+    
+    @SuppressWarnings("empty-statement")
+    public static int getIndiceRadioBoutonSelectionné () {
+        Toggle toggle = TOGGLE_GROUP_OPTIONS.getSelectedToggle() ;
+        int i = 0 ; 
+        for (; OPTIONS[i] != toggle ; i++) ;
+        return i ;
+    }
 
     public Options() {
         for (int i = 0; i < OPTIONS.length; i++) {
             OPTIONS[i] = new RadioButton() ;
-            OPTIONS[i].setToggleGroup(TOGGLE_GROUP);
+            OPTIONS[i].setToggleGroup(TOGGLE_GROUP_OPTIONS);
             OPTIONS[i].setOnMouseEntered(new HandlerSourisEntrée(OPTIONS[i]));
             OPTIONS[i].setOnMouseExited(new HandlerSourisSortie(OPTIONS[i]));
             
