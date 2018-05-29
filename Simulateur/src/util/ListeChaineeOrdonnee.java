@@ -48,7 +48,7 @@ public class ListeChaineeOrdonnee<T> implements Iterable<T> {
 		fictif.suivant = maillon ;
 	    size++ ;
 	}
-
+        
 	@Override
 	public String toString() {
 	    StringBuilder str = new StringBuilder("[") ;

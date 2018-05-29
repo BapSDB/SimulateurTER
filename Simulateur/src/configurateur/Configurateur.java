@@ -1,10 +1,11 @@
 package configurateur;
 
+import exceptions.SimulateurException;
 import exceptions.config.ConfigFichierIntrouvableException;
 import exceptions.config.ConfigLireObjetsException;
 import exceptions.config.ConfigNomObjetException;
-import exceptions.oebl.OEBLFichierIntrouvableException;
-import exceptions.oebl.OEBLLireDonneesException;
+import exceptions.csv.CSVFichierIntrouvableException;
+import exceptions.csv.CSVLireDonneesException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public final class Configurateur {
      * si une erreur d'entrée/sortie est apparue
      */
     
-    private static void lireFichierConfig(Traducteur traducteur) throws ConfigFichierIntrouvableException, ConfigLireObjetsException {
+    private static void lireFichierConfig(Traducteur traducteur) throws SimulateurException {
         String nomObjet ;
         try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(traducteur.getNomFichierConfig()))) {
             while ((nomObjet = lineNumberReader.readLine()) != null)
@@ -38,7 +39,7 @@ public final class Configurateur {
         }
     }
     
-    private static void lireFichierOEBL(Traducteur traducteur) throws OEBLFichierIntrouvableException, OEBLLireDonneesException {
+    private static void lireFichierOEBL(Traducteur traducteur) throws SimulateurException {
         String ligne ;
         try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(traducteur.getNomFichierOEBL()))) {
             while ((ligne = lineNumberReader.readLine()) != null) {
@@ -46,13 +47,13 @@ public final class Configurateur {
                 traducteur.getTableauCSV().lireValeur(evenement[0], evenement[1], evenement[2]) ;
             }
         } catch (FileNotFoundException ex) {
-            throw new OEBLFichierIntrouvableException(traducteur.getNomFichierOEBL()) ;
+            throw new CSVFichierIntrouvableException(traducteur.getNomFichierOEBL()) ;
         } catch (IOException ex) {
-            throw new OEBLLireDonneesException(traducteur.getNomFichierOEBL()) ;
+            throw new CSVLireDonneesException(traducteur.getNomFichierOEBL()) ;
         }
     }    
 
-    public static void lireFormatOEBL(Traducteur traducteur) throws ConfigFichierIntrouvableException, ConfigLireObjetsException, OEBLFichierIntrouvableException, OEBLLireDonneesException {
+    public static void lireFormatOEBL(Traducteur traducteur) throws SimulateurException {
         lireFichierConfig(traducteur);
         lireFichierOEBL(traducteur);
     }

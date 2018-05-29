@@ -1,9 +1,9 @@
 package simulateur;
 
 import exceptions.SimulateurException;
-import exceptions.config.ConfigFichierIntrouvableException;
-import exceptions.config.ConfigLireObjetsException;
-import exceptions.oebl.OEBLEcrireDonneesFormatCSVException;
+import exceptions.csv.CSVEcrireDonneesException;
+import exceptions.csv.CSVFichierIntrouvableException;
+import exceptions.csv.CSVLireDonneesException;
 import static traducteur.Traducteur.AFFICHAGE_BEAN;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -58,16 +58,16 @@ public final class Simulateur {
         AFFICHAGE_BEAN.setAffichage("Chargement terminé.\n");
     }
     
-    private void lireFormatCSV (String nomFichierCSV) throws ConfigFichierIntrouvableException, ConfigLireObjetsException {
+    private void lireFormatCSV (String nomFichierCSV) throws SimulateurException {
         String ligne ;
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(nomFichierCSV))) {
             entete = new ArrayList<>(Arrays.asList(bufferedReader.readLine().split(";"))) ;
             while ((ligne = bufferedReader.readLine()) != null)
                 contenu.append(ligne).append("\n");
         } catch (FileNotFoundException ex) {
-            throw  new ConfigFichierIntrouvableException(nomFichierCSV);
+            throw  new CSVFichierIntrouvableException(nomFichierCSV);
         } catch (IOException ex) {
-            throw new ConfigLireObjetsException(nomFichierCSV);
+            throw new CSVLireDonneesException(nomFichierCSV);
         }
     }
     
@@ -124,7 +124,7 @@ public final class Simulateur {
             AFFICHAGE_BEAN.setAffichage("Traduction terminée --> création du fichier " + nomFichierCSV + "\n");
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
-            throw new OEBLEcrireDonneesFormatCSVException(nomFichierCSV) ;
+            throw new CSVEcrireDonneesException(nomFichierCSV) ;
         }
     }
 
