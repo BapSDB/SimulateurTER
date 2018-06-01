@@ -59,8 +59,10 @@ class Fichier extends HBox {
         } catch (IOException ex) {
             new CheminCanoniqueException().afficherMessageDansConsole() ;
         }
+        CHARGER_FICHIER.setDisable(false);
         CHARGER_FICHIER.setSelected(false);
         CHARGER_FICHIER.setMouseTransparent(false);
+        CHARGER_FICHIER.setFocusTraversable(true);
         setMessageEtape2();
     }
 

@@ -1,24 +1,26 @@
 
 package ihm.javafx;
 
-import static ihm.javafx.Options.getIndiceRadioBoutonSelectionné;
-import static ihm.javafx.Vue.BORDER_PANE_PANNEAU;
+import static ihm.javafx.Options.activerIntervalle;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
-import static ihm.javafx.Vue.BORDER_PANE_TABLEAU;
-import static ihm.javafx.Vue.BORDER_PANE_ARBRE;
+import static ihm.javafx.Vue.TABLEAU;
+import static ihm.javafx.Vue.charger;
+import static ihm.javafx.Vue.simulateur;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 
-public final class Multimedia extends GridPane {
+final class Multimedia extends GridPane {
     
     static final ToggleButton CHARGER_FICHIER = new ToggleButton("Charger Fichier");
     
@@ -31,6 +33,7 @@ public final class Multimedia extends GridPane {
     };
     
     private static final Button [] MULTIMEDIA = new Button[4] ;
+    private static PropertyChangeListener ecouteurSimulateur ;
     
     public Multimedia() {
         
@@ -42,6 +45,7 @@ public final class Multimedia extends GridPane {
             button.setOnMouseEntered(new HandlerSourisEntrée(button));
             button.setOnMouseExited(new HandlerSourisSortie(button));
             button.setId("multimedia");
+            button.setDisable(true);
             setConstraints(button, i, 1);
             MULTIMEDIA[i++] = button ;
             getChildren().add(button);
@@ -50,8 +54,7 @@ public final class Multimedia extends GridPane {
         setConstraints(MULTIMEDIA[3], 1, 1);
         getChildren().remove(3);
         
-        CHARGER_FICHIER.setSelected(true);
-        CHARGER_FICHIER.setMouseTransparent(true);
+        CHARGER_FICHIER.setDisable(true);
         CHARGER_FICHIER.setFont(Font.font(16));
         CHARGER_FICHIER.setMaxWidth(Double.MAX_VALUE);
         setFillWidth(CHARGER_FICHIER, true);
@@ -61,63 +64,89 @@ public final class Multimedia extends GridPane {
         
         setPadding(new Insets(10d));
         setAlignment(Pos.CENTER);
-        CHARGER_FICHIER.setOnAction(new HandlerChargerFichier());
-        MULTIMEDIA[1].setOnAction(new HandlerLecture());
-        MULTIMEDIA[3].setOnAction(new HandlerPause());
+        CHARGER_FICHIER.setOnAction(this::saisirActionEventChargerFichier);
+        MULTIMEDIA[1].addEventHandler(ActionEvent.ACTION, this::saisirActionEventLecture);
+        MULTIMEDIA[3].addEventHandler(ActionEvent.ACTION, this::saisirActionEventPause);
         
     }
-
-    private static class HandlerChargerFichier implements EventHandler<ActionEvent> {
+    
+    void ecouterSimulateur () {
+        if (ecouteurSimulateur != null)
+            simulateur.removePropertyChangeListener(ecouteurSimulateur);
+        for (Button button : MULTIMEDIA)
+            button.setDisable(true);
+        MULTIMEDIA[0].setOnAction(event->{simulateur.precedent();});
+        MULTIMEDIA[1].setOnAction(event->{simulateur.lancer();});
+        MULTIMEDIA[2].setOnAction(event->{simulateur.suivant();});
+        MULTIMEDIA[3].setOnAction(event->{simulateur.suspendre();});
+        simulateur.addPropertyChangeListener(ecouteurSimulateur = this::ecouterSimulateur);
+        simulateur.mettreAjourIteration();
+    }
+    
+    void activerLanceur () {
+        MULTIMEDIA[1].setDisable(false);
+        MULTIMEDIA[3].setDisable(false);
+        MULTIMEDIA[1].requestFocus();
+    }
+    
+    void désactiverLanceur () {
+        getChildren().set(1, MULTIMEDIA[1]);
+        MULTIMEDIA[1].setDisable(true);
+        MULTIMEDIA[3].setDisable(true);
+    }
+    
         
-        private int indice ;
-        
-        @Override
-        public void handle(ActionEvent event) {
-            if (CHARGER_FICHIER.isSelected())
-                chargerFichier(getIndiceRadioBoutonSelectionné()) ;
-        }
-        
-        private void chargerFichier(int indice) {
-            CHARGER_FICHIER.setSelected(true);
-            CHARGER_FICHIER.setMouseTransparent(true);
-            ProgressIndicator progressIndicatorTableau = new ProgressIndicator() ;
-            ProgressIndicator progressIndicatorArbre = new ProgressIndicator() ;
-            ProgressIndicator progressIndicatorPanneau = new ProgressIndicator() ;
-            TacheChargerFichier tâcheChargerFichier = new TacheChargerFichier(indice) ;
-            progressIndicatorTableau.progressProperty().bind(tâcheChargerFichier.progressProperty());
-            progressIndicatorArbre.progressProperty().bind(tâcheChargerFichier.progressProperty());
-            progressIndicatorPanneau.progressProperty().bind(tâcheChargerFichier.progressProperty());
-
-            Platform.runLater(() -> {
-                BORDER_PANE_TABLEAU.setCenter(progressIndicatorTableau);
-                BORDER_PANE_ARBRE.setCenter(progressIndicatorArbre);
-                BORDER_PANE_PANNEAU.setCenter(progressIndicatorPanneau);
-            });
-
-            new Thread(tâcheChargerFichier).start();
-        }
-        
+    private void saisirActionEventChargerFichier (ActionEvent event) {
+        CHARGER_FICHIER.setSelected(true);
+        CHARGER_FICHIER.setMouseTransparent(true);
+        CHARGER_FICHIER.setFocusTraversable(false);
+        activerIntervalle();
+        charger(new TacheChargerFichier());
     }
 
-    private class HandlerLecture implements EventHandler<ActionEvent> {
 
-        public HandlerLecture() {
-        }
-
-        @Override
-        public void handle(ActionEvent event) {
-            getChildren().set(1, MULTIMEDIA[3]);
-        }
+    private void saisirActionEventLecture (ActionEvent event) {
+        getChildren().set(1, MULTIMEDIA[3]);
+        MULTIMEDIA[3].requestFocus();
     }
 
-    private class HandlerPause implements EventHandler<ActionEvent> {
+    private void saisirActionEventPause (ActionEvent event) {
+        getChildren().set(1, MULTIMEDIA[1]);
+        MULTIMEDIA[1].requestFocus();
+    }
+    
+    
+    @SuppressWarnings("unchecked")
+    private void ecouterSimulateur(PropertyChangeEvent evt) {
 
-        public HandlerPause() {
-        }
+        switch(evt.getPropertyName()) {
 
-        @Override
-        public void handle(ActionEvent event) {
-            getChildren().set(1, MULTIMEDIA[1]);
+            case "aPrecedent" :
+
+                MULTIMEDIA[0].setDisable(!simulateur.isaPrecedent()) ;
+                break ;
+
+            case "precedent" :
+
+                Platform.runLater(() -> {
+                    TABLEAU.getItems().remove(TABLEAU.getItems().size()-1);
+                    TABLEAU.scrollTo(TABLEAU.getItems().size()-1);
+                });
+                break ;
+
+            case "suivant" :
+
+
+                Platform.runLater(() -> {
+                    TABLEAU.getItems().add(FXCollections.observableList((List<String>)(evt.getNewValue())));
+                    TABLEAU.scrollTo(TABLEAU.getItems().size()-1);
+                });
+                break ;
+
+            case "aSuivant" :
+
+                MULTIMEDIA[2].setDisable(!simulateur.isaSuivant()) ;
+                break ;
         }
     }
 }

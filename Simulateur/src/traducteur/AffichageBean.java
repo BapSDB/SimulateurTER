@@ -9,10 +9,10 @@ public class AffichageBean {
     
     private String affichage;
     
-    private final PropertyChangeSupport propertySupport;
+    private final PropertyChangeSupport changeSupport;
     
     public AffichageBean() {
-        this.propertySupport = new PropertyChangeSupport(this);
+        this.changeSupport = new PropertyChangeSupport(this);
     }
     
     public String getAffichage() {
@@ -22,15 +22,15 @@ public class AffichageBean {
     public void setAffichage(String value) {
         String oldValue = affichage;
         affichage = value;
-        propertySupport.firePropertyChange(PROPRIETE_AFFICHAGE, oldValue, affichage);
+        changeSupport.firePropertyChange(PROPRIETE_AFFICHAGE, oldValue, affichage);
     }
     
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertySupport.addPropertyChangeListener(listener);
+        changeSupport.addPropertyChangeListener(listener);
     }
     
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertySupport.removePropertyChangeListener(listener);
+        changeSupport.removePropertyChangeListener(listener);
     }
     
 }

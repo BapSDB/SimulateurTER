@@ -1,6 +1,5 @@
 package simulateur;
 
-import strategie.Simulateur;
 import exceptions.SimulateurException;
 import exceptions.csv.CSVEcrireDonneesException;
 import exceptions.csv.CSVFichierIntrouvableException;
@@ -17,8 +16,8 @@ import java.io.FileReader;
 import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import traducteur.TableauCSV.PositionPadding;
 import traducteur.TableauCSV.ValeurPosition;
@@ -33,8 +32,8 @@ public final class Formateur {
     
     private Traducteur traducteur ;
     
-    private Collection<String> entete ;
-    private final Collection<Collection<String>> contenu = new ArrayList<>(NB_EVENEMENTS) ;
+    private List<String> entete ;
+    private final List<List<String>> contenu = new ArrayList<>(NB_EVENEMENTS) ;
     
     private static final String JVM = new File(Simulateur.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent()
             + FileSystems.getDefault().getSeparator() + ".." + FileSystems.getDefault().getSeparator() + "traces" ; 
@@ -145,8 +144,14 @@ public final class Formateur {
         this.traducteur = traducteur;
     }
 
-    public Simulateur nouveauSimulateur () {
-        return new Simulateur(entete, contenu);
+    public Simulateur nouveauSimulateur (int indice) {
+        
+        switch(indice) {
+            case 0 :
+            case 1 : return new Simulateur(entete, contenu);
+            case 2 : return new Ajourneur(entete, contenu);
+            default : throw new IllegalStateException();
+        }
     }
 
     

@@ -58,7 +58,7 @@ final class ArbreRepertoires extends TreeView<Fichier> {
             
             TreeItem<Fichier> treeItem = getSelectionModel().getSelectedItem() ;
             
-            if (treeItem != null && treeItem.getValue().getRadioButton() != null && event.getCode() == KeyCode.ENTER) {
+            if (treeItem != null && treeItem.getValue().getRadioButton() != null && event.getCode() == KeyCode.SPACE) {
                 treeItem.getValue().getRadioButton().setSelected(true) ;
                 treeItem.getValue().selectionerFichier();
             }

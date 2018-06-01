@@ -13,10 +13,11 @@ import java.util.logging.Logger;
 public class TimeStamp {
     
     public static final String FORMAT_UNSIGNED_LONG_LONG = "\\d+" ;
-    public static final String FORMAT_HEURE = "(([01]\\d)|(2[0-3])):[0-5]\\d:[0-5]\\d" ;
+    public static final String FORMAT_HMS = "(([01]\\d)|(2[0-3])):[0-5]\\d:[0-5]\\d" ;
     public static final String FORMAT_DATE = "\\d{4}-\\d{2}-\\d{2}" ;
-    public static final String FORMAT_DATE_HEURE = FORMAT_DATE + "_" + FORMAT_HEURE ;
+    public static final String FORMAT_DATE_HEURE = FORMAT_DATE + "_" + FORMAT_HMS ;
     public static final int LONGUEUR_FORMAT_DATE_HEURE = "yyyy-MM-jj_HH:mm:ss".length() ;
+            
     private static final SimpleDateFormat TIMESTAMP_CONSOLE_FORMAT = new SimpleDateFormat("[HH:mm:ss] ") ;
     
     private static boolean verifierMoisLong (String [] date) {
@@ -82,6 +83,13 @@ public class TimeStamp {
 	} catch (ParseException ex) {
 	    throw new TimeStampParseException(nomFichierEntree, evenements[0], numLigne, ex.getErrorOffset());
 	}
+    }
+    
+    public static long convertirFormatHMSVersLong (String hms) {
+        String [] split = hms.split(":");
+        return    Long.parseUnsignedLong(split[0])*3600
+                + Long.parseUnsignedLong(split[1])*60
+                + Long.parseUnsignedLong(split[2]) ;
     }
     
     public static String getTimestampAffichageConsole () {

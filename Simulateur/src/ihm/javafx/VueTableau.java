@@ -1,6 +1,6 @@
 package ihm.javafx;
 
-import java.io.IOException;
+import com.sun.javafx.scene.control.skin.TableViewSkin;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -12,10 +12,22 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 
 public class VueTableau extends TableView<ObservableList<String>> {
-    
+
     public void vider() {
         getColumns().clear();
         getItems().clear();
+        afficherLignesVides();
+    }
+    
+    public void afficherLignesVides () {
+        
+        setSkin(new TableViewSkin<ObservableList<String>>(this) {
+            @Override
+            public int getItemCount() {
+                int r = super.getItemCount();
+                return r == 0 ? 1 : r;
+            }
+        });
     }
     
     static class FabriqueCellule implements Callback<TableColumn<ObservableList<String>, String>, TableCell<ObservableList<String>, String>> {
