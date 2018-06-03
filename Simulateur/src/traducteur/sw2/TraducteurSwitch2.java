@@ -6,6 +6,7 @@ import exceptions.config.ConfigEcrireObjetsException;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.regex.Pattern;
 import traducteur.TableauCSV;
 import traducteur.Traducteur;
@@ -34,6 +35,8 @@ public class TraducteurSwitch2 extends Traducteur {
     private static final String VALEUR = "\\d+" ;
     private static final String UNITE = "W" ;
     private static final Pattern PATTERN_SW2 = Pattern.compile(TIMESTAMP+SEPARATEUR+ID+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR+SEPARATEUR+UNITE) ;
+    
+    private static final SimpleDateFormat CONVERTISSEUR = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss") ;
 
     public TraducteurSwitch2(FabriqueTraducteurSwitch2 ft) throws SimulateurException {
 	super(ft);
@@ -60,4 +63,9 @@ public class TraducteurSwitch2 extends Traducteur {
         return SEPARATEUR ;
     }
 
+    @Override
+    public SimpleDateFormat getConvertisseur() {
+        return  CONVERTISSEUR ;
+    }
+    
 }

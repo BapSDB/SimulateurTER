@@ -2,6 +2,7 @@
 package traducteur.mqtt;
 
 import exceptions.SimulateurException;
+import java.text.SimpleDateFormat;
 import java.util.regex.Pattern;
 import traducteur.Traducteur;
 import util.TimeStamp;
@@ -23,12 +24,14 @@ public class TraducteurMQTT extends Traducteur {
     private static final String TIMESTAMP = TimeStamp.FORMAT_UNSIGNED_LONG_LONG ;
     private static final String BLANCS = "[^\\S\\n]+" ;
             static final String SEPARATEUR = BLANCS ;
-    private static final String CHEMIN = "(.+?)(\\.[^.\"]*\"|\")" ; // récupéré depuis http://movingtofreedom.org/2008/04/01/regex-match-filename-base-and-extension/ le mardi 15 mai 2018
+    private static final String CHEMIN = "(.+?)(\\.[^.\"]*\"|\")" ;
     private static final String TOPIC = "\"topic\":\""+CHEMIN ;
     private static final String NOM_OBJET = "\"name\":\"[A-Za-z]\\w*\"" ;
     private static final String TYPE = "\"operation\":\"[A-Za-z]\\w*\"" ;
     private static final String VALEUR = "\"message\":\".+\"" ;
     private  static final Pattern PATTERN_MQQT = Pattern.compile(TIMESTAMP+SEPARATEUR+"\\{"+TOPIC+","+NOM_OBJET+","+TYPE+","+VALEUR+"\\}") ;
+    
+    private static final SimpleDateFormat CONVERTISSEUR = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss") ;
     
     public TraducteurMQTT(FabriqueTraducteurMQTT ft) throws SimulateurException {
 	super(ft);
@@ -44,4 +47,11 @@ public class TraducteurMQTT extends Traducteur {
         return SEPARATEUR ;
     }
 
+    @Override
+    public SimpleDateFormat getConvertisseur() {
+        return CONVERTISSEUR ;
+    }
+
+    
+    
 }

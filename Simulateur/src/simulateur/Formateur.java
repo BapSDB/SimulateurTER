@@ -4,7 +4,6 @@ import exceptions.SimulateurException;
 import exceptions.csv.CSVEcrireDonneesException;
 import exceptions.csv.CSVFichierIntrouvableException;
 import exceptions.csv.CSVLireDonneesException;
-import static traducteur.Traducteur.AFFICHAGE_BEAN;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,6 +26,7 @@ import util.ListeChaineeOrdonnee.ListeChaineeOrdonneeIterateur;
 import util.StringUtil;
 import util.Util;
 import static util.Util.NB_EVENEMENTS;
+import static traducteur.Traducteur.AFFICHAGE;
 
 public final class Formateur {
     
@@ -35,7 +35,7 @@ public final class Formateur {
     private List<String> entete ;
     private final List<List<String>> contenu = new ArrayList<>(NB_EVENEMENTS) ;
     
-    private static final String JVM = new File(Simulateur.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent()
+    private static final String JVM = new File(Iterateur.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent()
             + FileSystems.getDefault().getSeparator() + ".." + FileSystems.getDefault().getSeparator() + "traces" ; 
     public static final String TRACES = new File(System.getProperty("user.dir")).toPath().relativize(new File(JVM).toPath()) + FileSystems.getDefault().getSeparator() ;
     public static final String OEBL = TRACES + "oebl" + FileSystems.getDefault().getSeparator() ;
@@ -57,11 +57,11 @@ public final class Formateur {
         if (!new File(nomFichierCSV).exists())
             ecrireFormatCSV(nomFichierCSV);
         else {
-            AFFICHAGE_BEAN.setAffichage("Le fichier " + traducteur.getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.\n") ;
-            AFFICHAGE_BEAN.setAffichage("Chargement du fichier " + nomFichierCSV + "...\n") ;
+            AFFICHAGE.setAffichage("Le fichier " + traducteur.getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.") ;
+            AFFICHAGE.setAffichage("Chargement du fichier " + nomFichierCSV + "...") ;
             lireFormatCSV(nomFichierCSV);
         }
-        AFFICHAGE_BEAN.setAffichage("Chargement terminé.\n");
+        AFFICHAGE.setAffichage("Chargement terminé.");
     }
     
     private void lireFormatCSV (String nomFichierCSV) throws SimulateurException {
@@ -86,7 +86,7 @@ public final class Formateur {
      */
     
     public void ecrireFormatCSV (String nomFichierCSV) throws SimulateurException {
-        AFFICHAGE_BEAN.setAffichage("Création de " + nomFichierCSV + " en cours...\n");
+        AFFICHAGE.setAffichage("Création de " + nomFichierCSV + " en cours...");
         String seqChar ;
         entete = new ArrayList<>(traducteur.getTableauCSV().getNomsObjets().size() + 1) ;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(nomFichierCSV))) {
@@ -129,7 +129,7 @@ public final class Formateur {
                 }
                 
             }
-            AFFICHAGE_BEAN.setAffichage("Traduction terminée --> création du fichier " + nomFichierCSV + "\n");
+            AFFICHAGE.setAffichage("Traduction terminée --> création du fichier " + nomFichierCSV);
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
             throw new CSVEcrireDonneesException(nomFichierCSV) ;
@@ -144,12 +144,13 @@ public final class Formateur {
         this.traducteur = traducteur;
     }
 
-    public Simulateur nouveauSimulateur (int indice) {
+    public Iterateur nouveauSimulateur (int indice) {
         
         switch(indice) {
             case 0 :
-            case 1 : return new Simulateur(entete, contenu);
-            case 2 : return new Ajourneur(entete, contenu);
+            case 1 : return new Iterateur(entete, contenu);
+            case 2 : return new Simulateur(entete, contenu);
+            case 3 : return new Ajourneur(entete, contenu);
             default : throw new IllegalStateException();
         }
     }

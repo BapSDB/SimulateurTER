@@ -3,7 +3,7 @@ package traducteur;
 
 import java.beans.*;
 
-public class AffichageBean {
+public class Affichage {
     
     public static final String PROPRIETE_AFFICHAGE = "affichage";
     
@@ -11,7 +11,7 @@ public class AffichageBean {
     
     private final PropertyChangeSupport changeSupport;
     
-    public AffichageBean() {
+    public Affichage() {
         this.changeSupport = new PropertyChangeSupport(this);
     }
     

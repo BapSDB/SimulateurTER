@@ -6,6 +6,7 @@ import exceptions.traducteur.TraducteurTraduireFichierOriginalVersFichierOEBLExc
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.regex.Pattern;
 import traducteur.Traducteur;
 import util.TimeStamp;
@@ -27,7 +28,7 @@ public class TraducteurOEBL extends Traducteur {
     private static final String NOM_OBJET = "[A-Za-z]\\w*" ;
     private static final String VALEUR = "[\\w\\.]+" ;
     private static final Pattern PATTERN_ONE_EVENT_BY_LINE = Pattern.compile(TIMESTAMP+SEPARATEUR+NOM_OBJET+SEPARATEUR+VALEUR) ;
-
+    
     public TraducteurOEBL(FabriqueTraducteurOEBL ft) throws SimulateurException {
 	super(ft);
     }
@@ -52,4 +53,9 @@ public class TraducteurOEBL extends Traducteur {
         return SEPARATEUR ;
     }
 
+    @Override
+    public SimpleDateFormat getConvertisseur() {
+        return convertisseur ;
+    }
+    
 }

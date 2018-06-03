@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import static simulateur.Formateur.CSV;
@@ -21,10 +22,12 @@ import util.Util;
 public abstract class Traducteur {
     
     protected final FabriqueTraducteur ft ;
-    public static final AffichageBean AFFICHAGE_BEAN = new AffichageBean() ;
+    public static final Affichage AFFICHAGE = new Affichage() ;
+    public static SimpleDateFormat convertisseur ;
 
     public Traducteur(FabriqueTraducteur ft) throws SimulateurException  {
 	this.ft = ft ;
+        convertisseur = getConvertisseur() ;
         appliquerTraduction() ;
     }
     
@@ -39,18 +42,18 @@ public abstract class Traducteur {
         boolean existe ;
 	ft.tableauCSV.setPaddingTimeStamp(Math.max("timestamp".length(), 0)) ;
         if(existe = !new File(OEBL+RacineOEBL).exists() || !new File(OEBL+RacineConfig).exists()) {
-            AFFICHAGE_BEAN.setAffichage("Le fichier " + ft.nomFichierOriginal + " est en cours de traduction...\n") ;
+            AFFICHAGE.setAffichage("Le fichier " + ft.nomFichierOriginal + " est en cours de traduction...") ;
 	    traduireFormatOriginalVersFormatOEBL();
-            AFFICHAGE_BEAN.setAffichage("Traduction terminée --> création des fichiers " + OEBL + RacineOEBL + " et " + OEBL + RacineConfig + "\n") ;
+            AFFICHAGE.setAffichage("Traduction terminée --> création des fichiers " + OEBL + RacineOEBL + " et " + OEBL + RacineConfig) ;
 	}
         
-        AFFICHAGE_BEAN.setAffichage("Le fichier " + ft.nomFichierOriginal + " existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée.\n") ;
+        AFFICHAGE.setAffichage("Le fichier " + ft.nomFichierOriginal + " existe déjà au format \"One-Event-By-Line\" --> \u00c9tape de traduction ignorée") ;
         
         if (!existe && !new File(CSV+RacineCSV).exists()) {
-            AFFICHAGE_BEAN.setAffichage("Le fichier " + getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.\n") ;
-            AFFICHAGE_BEAN.setAffichage("Chargement du fichier " + getNomFichierCSV() + "...\n") ;
+            AFFICHAGE.setAffichage("Le fichier " + getNomFichierOEBL() + " existe déjà au format \"Comma-Separated Values\" --> \u00c9tape de traduction ignorée.") ;
+            AFFICHAGE.setAffichage("Chargement du fichier " + getNomFichierCSV() + "...") ;
             Configurateur.lireFormatOEBL(this);
-            AFFICHAGE_BEAN.setAffichage("Chargement terminé.\n");
+            AFFICHAGE.setAffichage("Chargement terminé.");
         }
     }
     
@@ -105,6 +108,8 @@ public abstract class Traducteur {
     
     public abstract Pattern getPattern () ;
     
-    public abstract String getSeparateur();
+    public abstract SimpleDateFormat getConvertisseur ();
+    
+    public abstract String getSeparateur() ;
 
 }

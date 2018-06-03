@@ -18,10 +18,11 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-import javax.management.timer.Timer;
-import static simulateur.Simulateur.intervalle;
+import static javax.management.timer.Timer.ONE_HOUR;
+import static javax.management.timer.Timer.ONE_MINUTE;
+import static javax.management.timer.Timer.ONE_SECOND;
+import static simulateur.Iterateur.intervalle;
 import static util.TimeStamp.FORMAT_HMS;
 import static util.TimeStamp.convertirFormatHMSVersLong;
 
@@ -47,9 +48,19 @@ final class Intervalle extends ComboBox<Intervalle.DureeIntervalle> {
     }
     
     private static final ObservableList<DureeIntervalle> LIST = FXCollections.observableArrayList(
-            new DureeIntervalle("1 seconde","00:00:01", Timer.ONE_SECOND),
-            new DureeIntervalle("1 minute","00:01:00", Timer.ONE_MINUTE),
-            new DureeIntervalle("1 heure","01:00:00", Timer.ONE_HOUR)
+            new DureeIntervalle("100 millisecondes","100", 100l),
+            new DureeIntervalle("1 seconde","00:00:01", ONE_SECOND),
+            new DureeIntervalle("2 secondes","00:00:02", 2l*ONE_SECOND),
+            new DureeIntervalle("5 secondes","00:00:05", 5l*ONE_SECOND),
+            new DureeIntervalle("10 secondes","00:00:10", 10l*ONE_SECOND),
+            new DureeIntervalle("30 secondes","00:00:30", 30l*ONE_SECOND),
+            new DureeIntervalle("1 minute","00:01:00", ONE_MINUTE),
+            new DureeIntervalle("2 minutes","00:02:00", 2l*ONE_MINUTE),
+            new DureeIntervalle("5 minutes","00:05:00", 5l*ONE_MINUTE),
+            new DureeIntervalle("10 minutes","00:10:00", 10l*ONE_MINUTE),
+            new DureeIntervalle("30 minutes","00:30:00", 30l*ONE_MINUTE),
+            new DureeIntervalle("1 heure","01:00:00", ONE_HOUR)
+            
     );
         
     private String hms, entree ;
@@ -105,7 +116,6 @@ final class Intervalle extends ComboBox<Intervalle.DureeIntervalle> {
     
     private void ecouterValueProperty (Observable observable) {
         Platform.runLater(() -> {
-            Vue.AFFICHAGE_CONSOLE.getChildren().add(new Text("intervalle = " + intervalle + ", Value = " + getValue() + "\n"));
             getEditor().setBackground(WHITE_BACKGROUND);
             setMouseTransparent(true);
             MULTIMEDIA.activerLanceur();
@@ -124,7 +134,7 @@ final class Intervalle extends ComboBox<Intervalle.DureeIntervalle> {
     private static long convertirDureeVersLong (String duree) {
         long intervalle ;
         if (duree.matches(FORMAT_HMS))
-            intervalle = convertirFormatHMSVersLong(duree)*Timer.ONE_SECOND ;
+            intervalle = convertirFormatHMSVersLong(duree)*ONE_SECOND ;
         else
             try {
                 intervalle = Long.parseUnsignedLong(duree) ;
@@ -135,7 +145,7 @@ final class Intervalle extends ComboBox<Intervalle.DureeIntervalle> {
     }
     
     private ListCell<DureeIntervalle> fabriquerCellule (ListView<DureeIntervalle> param) {
-        return new TextFieldListCell<>(new StringConverter<DureeIntervalle>(){
+        ListCell<DureeIntervalle> listCell = new TextFieldListCell<>(new StringConverter<DureeIntervalle>(){
                 @Override
                 public String toString(DureeIntervalle object) {
                     return object.duree ;
@@ -145,6 +155,9 @@ final class Intervalle extends ComboBox<Intervalle.DureeIntervalle> {
                     throw new UnsupportedOperationException();
                 }
         });
+        listCell.setOnMouseEntered(Vue::saisirMouseEventEntered);
+        listCell.setOnMouseExited(Vue::saisirMouseEventEntered);
+        return listCell;
     }
     
 }

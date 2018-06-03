@@ -11,13 +11,13 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import static ihm.javafx.Vue.TABLEAU;
 import static ihm.javafx.Vue.charger;
-import static ihm.javafx.Vue.simulateur;
 import ihm.javafx.VueTableau.FabriqueCellule;
 import ihm.javafx.VueTableau.FabriqueValeur;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import static simulateur.Formateur.nouveauFormateur;
 import static traducteur.FabriqueTraducteur.nouvelleFabrique;
+import static ihm.javafx.Vue.iterateur;
 
 class TacheChargerFichier extends Task<Void> {
 
@@ -25,9 +25,9 @@ class TacheChargerFichier extends Task<Void> {
     protected Void call() throws Exception {
         try {
             
-            simulateur = nouveauFormateur(nouvelleFabrique(fichierSélectionné).creer()).nouveauSimulateur(indiceOptionSelectionnée.get()) ;
+            iterateur = nouveauFormateur(nouvelleFabrique(fichierSélectionné).creer()).nouveauSimulateur(indiceOptionSelectionnée.get()) ;
             ecouterOptions();
-            Platform.runLater(MULTIMEDIA::ecouterSimulateur);
+            Platform.runLater(MULTIMEDIA::ecouterIterateur);
             TABLEAU.vider() ;
             
             chargerDonnees();
@@ -44,7 +44,7 @@ class TacheChargerFichier extends Task<Void> {
         
         TableColumn<ObservableList<String>, String> colonne ;
         int i = 0 ;
-        for (String donnee : simulateur.getEntete()) {
+        for (String donnee : iterateur.getEntete()) {
             TABLEAU.getColumns().add(colonne = new TableColumn<>(donnee)) ;
             colonne.setCellValueFactory(new FabriqueValeur(i++));
             colonne.setCellFactory(new FabriqueCellule());
@@ -55,6 +55,9 @@ class TacheChargerFichier extends Task<Void> {
             charger(new ChargerToutLeFichier());
         else
             Platform.runLater(Vue::mettreAjourAffichageInterface);
+        
+        if (indiceOptionSelectionnée.get() == 2)
+            MULTIMEDIA.activerLanceur() ;
 
     }
 }

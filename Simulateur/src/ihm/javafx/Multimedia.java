@@ -13,12 +13,14 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import static ihm.javafx.Vue.TABLEAU;
 import static ihm.javafx.Vue.charger;
-import static ihm.javafx.Vue.simulateur;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import static ihm.javafx.Vue.iterateur;
+import simulateur.Iterateur.Etat;
+import static simulateur.Iterateur.etat;
 
 final class Multimedia extends GridPane {
     
@@ -42,8 +44,8 @@ final class Multimedia extends GridPane {
             imageView.setFitWidth(24d);
             imageView.setFitHeight(24d);
             Button button = new Button(null, imageView) ;
-            button.setOnMouseEntered(new HandlerSourisEntrée(button));
-            button.setOnMouseExited(new HandlerSourisSortie(button));
+            button.setOnMouseEntered(Vue::saisirMouseEventEntered);
+            button.setOnMouseExited(Vue::saisirMouseEventExited);
             button.setId("multimedia");
             button.setDisable(true);
             setConstraints(button, i, 1);
@@ -65,22 +67,19 @@ final class Multimedia extends GridPane {
         setPadding(new Insets(10d));
         setAlignment(Pos.CENTER);
         CHARGER_FICHIER.setOnAction(this::saisirActionEventChargerFichier);
-        MULTIMEDIA[1].addEventHandler(ActionEvent.ACTION, this::saisirActionEventLecture);
-        MULTIMEDIA[3].addEventHandler(ActionEvent.ACTION, this::saisirActionEventPause);
-        
     }
     
-    void ecouterSimulateur () {
+    void ecouterIterateur () {
         if (ecouteurSimulateur != null)
-            simulateur.removePropertyChangeListener(ecouteurSimulateur);
+            iterateur.removePropertyChangeListener(ecouteurSimulateur);
         for (Button button : MULTIMEDIA)
             button.setDisable(true);
-        MULTIMEDIA[0].setOnAction(event->{simulateur.precedent();});
-        MULTIMEDIA[1].setOnAction(event->{simulateur.lancer();});
-        MULTIMEDIA[2].setOnAction(event->{simulateur.suivant();});
-        MULTIMEDIA[3].setOnAction(event->{simulateur.suspendre();});
-        simulateur.addPropertyChangeListener(ecouteurSimulateur = this::ecouterSimulateur);
-        simulateur.mettreAjourIteration();
+        MULTIMEDIA[0].setOnAction(this::saisirActionEventPrecedent);
+        MULTIMEDIA[1].setOnAction(this::saisirActionEventLecture);
+        MULTIMEDIA[2].setOnAction(this::saisirActionEventSuivant);
+        MULTIMEDIA[3].setOnAction(this::saisirActionEventPause);
+        iterateur.addPropertyChangeListener(ecouteurSimulateur = this::ecouterSimulateur);
+        iterateur.mettreAjourIteration();
     }
     
     void activerLanceur () {
@@ -103,14 +102,34 @@ final class Multimedia extends GridPane {
         activerIntervalle();
         charger(new TacheChargerFichier());
     }
+    
+    private void saisirActionEventPrecedent (ActionEvent event) {
+        if (etat == Etat.LECTURE)
+            iterateur.suspendre();
+        else
+            getChildren().set(1, MULTIMEDIA[1]);
+        MULTIMEDIA[0].requestFocus();
+        iterateur.precedent();
+    }
 
 
     private void saisirActionEventLecture (ActionEvent event) {
         getChildren().set(1, MULTIMEDIA[3]);
         MULTIMEDIA[3].requestFocus();
+        iterateur.lancer();
+    }
+    
+    private void saisirActionEventSuivant (ActionEvent event) {
+        if (etat == Etat.LECTURE)
+            iterateur.suspendre();
+        else
+            getChildren().set(1, MULTIMEDIA[1]);
+        MULTIMEDIA[2].requestFocus();
+        iterateur.suivant();
     }
 
     private void saisirActionEventPause (ActionEvent event) {
+        iterateur.suspendre();
         getChildren().set(1, MULTIMEDIA[1]);
         MULTIMEDIA[1].requestFocus();
     }
@@ -123,7 +142,11 @@ final class Multimedia extends GridPane {
 
             case "aPrecedent" :
 
-                MULTIMEDIA[0].setDisable(!simulateur.isaPrecedent()) ;
+                MULTIMEDIA[0].setDisable(!iterateur.aPrecedent()) ;
+                Platform.runLater(() -> {
+                    if(!iterateur.aPrecedent())
+                        MULTIMEDIA[2].requestFocus();
+                });
                 break ;
 
             case "precedent" :
@@ -136,16 +159,21 @@ final class Multimedia extends GridPane {
 
             case "suivant" :
 
-
                 Platform.runLater(() -> {
-                    TABLEAU.getItems().add(FXCollections.observableList((List<String>)(evt.getNewValue())));
+                    TABLEAU.getItems().add(FXCollections.observableList((List<String>)evt.getNewValue()));
                     TABLEAU.scrollTo(TABLEAU.getItems().size()-1);
                 });
                 break ;
 
             case "aSuivant" :
 
-                MULTIMEDIA[2].setDisable(!simulateur.isaSuivant()) ;
+                MULTIMEDIA[2].setDisable(!iterateur.aSuivant()) ;
+                Platform.runLater(() -> {
+                    if(!iterateur.aSuivant()) {
+                        getChildren().set(1, MULTIMEDIA[1]);
+                        MULTIMEDIA[0].requestFocus();
+                    }
+                });
                 break ;
         }
     }

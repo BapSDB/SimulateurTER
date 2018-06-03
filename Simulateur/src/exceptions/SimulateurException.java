@@ -1,6 +1,6 @@
 package exceptions;
 
-import static traducteur.Traducteur.AFFICHAGE_BEAN;
+import static traducteur.Traducteur.AFFICHAGE;
 
 public abstract class SimulateurException extends Exception {
     
@@ -23,7 +23,7 @@ public abstract class SimulateurException extends Exception {
     }
     
     public void afficherMessageDansConsole () {
-       AFFICHAGE_BEAN.setAffichage(getMessage());
+       AFFICHAGE.setAffichage(getMessage());
     }
     
 }

@@ -7,9 +7,7 @@ import static ihm.javafx.Multimedia.CHARGER_FICHIER;
 import static ihm.javafx.Vue.fichierSélectionné;
 import java.io.File;
 import java.io.IOException;
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.event.EventHandler;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
@@ -35,10 +33,10 @@ class Fichier extends HBox {
     private void configurerFichier() {
         Text text = new Text(fichier.getName());
         radioButton.setToggleGroup(toggleGroup);
-        radioButton.selectedProperty().addListener(new EcouteurSelectionRadioBoutton(radioButton));
-        setOnMouseEntered(new HandlerSourisEntrée(this));
-        setOnMouseExited(new HandlerSourisSortie(this));
-        setOnMouseClicked(new HandlerSourisSelectionFichier(radioButton));
+        radioButton.selectedProperty().addListener(this::ecouterRadioButton);
+        setOnMouseEntered(Vue::saisirMouseEventEntered);
+        setOnMouseExited(Vue::saisirMouseEventExited);
+        setOnMouseClicked(this::saisirMouseEventClicked);
         getChildren().addAll(radioButton, text) ;
         setSpacing(5d);
     }
@@ -65,39 +63,19 @@ class Fichier extends HBox {
         CHARGER_FICHIER.setFocusTraversable(true);
         setMessageEtape2();
     }
-
-    private class HandlerSourisSelectionFichier implements EventHandler<MouseEvent> {
-
-        private final RadioButton radioButton ;
-
-        public HandlerSourisSelectionFichier(RadioButton radioButton) {
-            this.radioButton = radioButton;
-        }
-
-        @Override
-        public void handle(MouseEvent event) {
-            if (!radioButton.isSelected()) {
-                radioButton.setSelected(true) ;
-                selectionerFichier();
-            }
-        }
-    }
-
-    private class EcouteurSelectionRadioBoutton implements InvalidationListener {
-
-        private final RadioButton radioButton;
-
-        private EcouteurSelectionRadioBoutton(RadioButton radioButton) {
-            this.radioButton = radioButton;
-        }
-
-        @Override
-        public void invalidated(Observable observable) {
-            if(radioButton.isSelected())
-                selectionerFichier();
+    
+    private void saisirMouseEventClicked(MouseEvent event) {
+        if (!radioButton.isSelected()) {
+            radioButton.setSelected(true) ;
+            selectionerFichier();
         }
     }
     
+    private void ecouterRadioButton (Observable observable) {
+        if(radioButton.isSelected())
+            selectionerFichier();
+    }
+
     private class CheminCanoniqueException extends SimulateurException {
 
         public CheminCanoniqueException() {

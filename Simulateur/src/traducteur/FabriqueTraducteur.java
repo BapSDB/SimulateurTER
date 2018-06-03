@@ -4,7 +4,6 @@ package traducteur;
 import exceptions.SimulateurException;
 import exceptions.traducteur.TraducteurFichierIntrouvableException;
 import exceptions.traducteur.TraducteurFormatFichierInconnuException;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;

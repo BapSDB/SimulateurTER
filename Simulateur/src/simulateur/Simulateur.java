@@ -1,133 +1,124 @@
 
 package simulateur;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+import java.text.ParseException;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Timer;
-import java.util.TimerTask;
+import static traducteur.Traducteur.AFFICHAGE;
+import static traducteur.Traducteur.convertisseur;
 
-public class Simulateur {
+class Simulateur extends Iterateur {
     
-    public static final Timer TIMER = new Timer() ;
-    public TimerTask TACHE;
-    public static long intervalle = -1 ;
-    protected boolean started ;
-    protected final List<String> entete;
-    protected final List<List<String>> contenu;
-    protected ListIterator<List<String>> iterateur;
-    
-    PropertyChangeSupport changeSupport;
-    private List<String> suivant;
-    private List<String> precedent;
-    private boolean aSuivant ;
-    private boolean aPrecedent ;
+    private final Thread SIMULATION ;
+    private PropertyChangeListener ecouteurSimulation ;
     
     public Simulateur(List<String> entete, List<List<String>> contenu) {
-        this.entete = entete;
-        this.contenu = contenu;
-        this.iterateur = this.contenu.listIterator();
-        this.changeSupport = new PropertyChangeSupport(this);
+        super(entete, contenu);
+        SIMULATION = new Thread(new Simulation()) ;
+        if (ecouteurSimulation != null)
+            changeSupport.removePropertyChangeListener(ecouteurSimulation) ;
+        changeSupport.addPropertyChangeListener(this::interrompreSimulation) ;
     }
     
-    public void mettreAjourIteration () {
-        setaSuivant(iterateur.hasNext());
-        setaPrecedent(iterateur.hasPrevious());
+    @Override
+    public synchronized void lancer() {
+        if (etat == Etat.EN_ATTENTE) {
+            AFFICHAGE.setAffichage("Lancement de la simulation") ;
+            SIMULATION.start() ;
+            etat = Etat.LECTURE ;
+        }
+        else {
+            AFFICHAGE.setAffichage("Reprise de la simulation") ;
+            setEtat(Etat.LECTURE);
+        }
+    }
+
+    @Override
+    public synchronized void suspendre() {
+        AFFICHAGE.setAffichage("Simulation en Pause") ;
+        setEtat(Etat.PAUSE);
     }
     
-    synchronized public void tuerTache() {
-        if (started) {
-            TACHE.cancel();
-            TIMER.purge();
+    @Override
+    public synchronized void tuer() {
+        setEtat(Etat.FIN);
+    }
+    
+    private synchronized void interrompreSimulation (PropertyChangeEvent evt) {
+        if(evt.getPropertyName().equals("etat")) {
+            SIMULATION.interrupt() ;
         }
     }
     
-    synchronized public void lancer () {}
-    
-    synchronized public void suspendre() {}
-    
-    public List<String> getEntete() {
-        return entete;
-    }
-    
-    public List<List<String>> getContenu() {
-        return contenu ;
-    }
+    private class Simulation implements Runnable {
+        
+        private long date, temps ;
+        private List<String> donnees ;
+        
+        private synchronized boolean afficherPremiereLigne () {
+            donnees = iterateur.next() ;
+            try {
+                date = convertisseur.parse(donnees.get(0)).getTime() ;
+            } catch (ParseException ex) {
+                ex.printStackTrace(System.err);
+                return false ;
+            }
+            setSuivant(donnees);
+            mettreAjourIteration();
+            return true ;
+        }
+        
+        private void attendreDelai () throws InterruptedException {
+            Thread.sleep(temps) ;
+        }
 
-    public ListIterator<List<String>> getIterateur() {
-        return iterateur;
-    }
+        private boolean afficherProchaineLigne () {
+            
+            donnees = iterateur.next() ;
+            
+            try {
+                temps = convertisseur.parse(donnees.get(0)).getTime() - date ;
+            } catch (ParseException ex) {
+                ex.printStackTrace(System.err);
+                return false ;
+            }
+            
+            try {
+                attendreDelai();
+            } catch (InterruptedException ex) {
+                try {
+                    synchronized(this) {
+                        wait() ;
+                    }
+                    temps = System.currentTimeMillis() - temps ;
+                    attendreDelai();
+                } catch (InterruptedException ex1) {
+                    if (etat == Etat.LECTURE)
+                        synchronized(this) {
+                            notify() ;
+                        }
+                    else
+                        return false ;
+                }
+            }
+            setSuivant(donnees);
+            mettreAjourIteration();
+            return true ;
+        }
+        
+        
+        @Override
+        public synchronized void run() {
+            
+            if (aSuivant())
+                if(!afficherPremiereLigne())
+                    return ;
 
-    public void setIterateur(ListIterator<List<String>> iterateur) {
-        this.iterateur = iterateur;
+            while (aSuivant())
+                    if (!afficherProchaineLigne())
+                        return ;
+                    
+        }
     }
-
-    public void suivant() {
-        setSuivant(iterateur.next());
-        mettreAjourIteration();
-    }
-    
-    public final boolean isaSuivant() {
-        return aSuivant;
-    }
-
-    private void setaSuivant(boolean aSuivant) {
-        boolean ancienneValeur = this.aSuivant;
-        this.aSuivant = aSuivant;
-        changeSupport.firePropertyChange("aSuivant", ancienneValeur, aSuivant);
-    }
-    
-    public List<String> getSuivant () {
-        return suivant ;
-    }
-
-    private void setSuivant(List<String> suivant) {
-        List<String> ancienneValeur = this.suivant;
-        this.suivant = suivant;
-        changeSupport.firePropertyChange("suivant", ancienneValeur, suivant);
-    }
-    
-    public void precedent() {
-        setPrecedent(iterateur.previous());
-        mettreAjourIteration();
-    }
-    
-    public final boolean isaPrecedent() {
-        return aPrecedent;
-    }
-
-    private void setaPrecedent(boolean aPrecedent) {
-        boolean ancienneValeur = this.aPrecedent;
-        this.aPrecedent = aPrecedent;
-        changeSupport.firePropertyChange("aPrecedent", ancienneValeur, aPrecedent);
-    }
-    
-    public List<String> getPrecedent () {
-        return precedent ;
-    }
-    
-    private void setPrecedent(List<String> precedent) {
-        List<String> ancienneValeur = this.precedent;
-        this.precedent = precedent;
-        changeSupport.firePropertyChange("precedent", ancienneValeur, precedent);
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        changeSupport.addPropertyChangeListener(listener);
-    }
-    
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        changeSupport.removePropertyChangeListener(listener);
-    }
-    
-    public Simulateur nouvelAjourneur() {
-        Ajourneur ajourneur = new Ajourneur(entete, contenu);
-        ajourneur.iterateur = this.iterateur ;
-        ajourneur.started = this.started ;
-        return ajourneur ;
-    }
-    
-    
-
 }
