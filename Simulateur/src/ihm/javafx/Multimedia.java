@@ -2,6 +2,7 @@
 package ihm.javafx;
 
 import static ihm.javafx.Options.activerIntervalle;
+import static ihm.javafx.Options.indiceOptionSelectionnée;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -74,6 +75,8 @@ final class Multimedia extends GridPane {
             iterateur.removePropertyChangeListener(ecouteurSimulateur);
         for (Button button : MULTIMEDIA)
             button.setDisable(true);
+        if (indiceOptionSelectionnée.get() == 2)
+            activerLanceur();
         MULTIMEDIA[0].setOnAction(this::saisirActionEventPrecedent);
         MULTIMEDIA[1].setOnAction(this::saisirActionEventLecture);
         MULTIMEDIA[2].setOnAction(this::saisirActionEventSuivant);
@@ -85,6 +88,7 @@ final class Multimedia extends GridPane {
     void activerLanceur () {
         MULTIMEDIA[1].setDisable(false);
         MULTIMEDIA[3].setDisable(false);
+        getChildren().set(1, MULTIMEDIA[1]);
         MULTIMEDIA[1].requestFocus();
     }
     
@@ -95,7 +99,7 @@ final class Multimedia extends GridPane {
     }
     
         
-    private void saisirActionEventChargerFichier (ActionEvent event) {
+    private synchronized void saisirActionEventChargerFichier (ActionEvent event) {
         CHARGER_FICHIER.setSelected(true);
         CHARGER_FICHIER.setMouseTransparent(true);
         CHARGER_FICHIER.setFocusTraversable(false);
@@ -103,32 +107,48 @@ final class Multimedia extends GridPane {
         charger(new TacheChargerFichier());
     }
     
-    private void saisirActionEventPrecedent (ActionEvent event) {
-        if (etat == Etat.LECTURE)
+    private synchronized void saisirActionEventPrecedent (ActionEvent event) {
+        if (indiceOptionSelectionnée.get() == 3 && etat == Etat.LECTURE)
             iterateur.suspendre();
-        else
-            getChildren().set(1, MULTIMEDIA[1]);
+        else if (indiceOptionSelectionnée.get() == 2 && (etat == Etat.LECTURE || etat== Etat.PAUSE)){
+            iterateur.tuer();
+            iterateur = iterateur.nouvelIterateur(indiceOptionSelectionnée.get());
+        }
+        getChildren().set(1, MULTIMEDIA[1]);
         MULTIMEDIA[0].requestFocus();
         iterateur.precedent();
+        if (indiceOptionSelectionnée.get() > 1) {
+            MULTIMEDIA[1].setDisable(false);
+            MULTIMEDIA[3].setDisable(false);
+            getChildren().set(1, MULTIMEDIA[1]);
+        }
     }
 
 
-    private void saisirActionEventLecture (ActionEvent event) {
+    private synchronized void saisirActionEventLecture (ActionEvent event) {
         getChildren().set(1, MULTIMEDIA[3]);
         MULTIMEDIA[3].requestFocus();
         iterateur.lancer();
     }
     
-    private void saisirActionEventSuivant (ActionEvent event) {
-        if (etat == Etat.LECTURE)
+    private synchronized void saisirActionEventSuivant (ActionEvent event) {
+        if (indiceOptionSelectionnée.get() == 3 && etat == Etat.LECTURE)
             iterateur.suspendre();
-        else
-            getChildren().set(1, MULTIMEDIA[1]);
+        else if (indiceOptionSelectionnée.get() == 2 && (etat == Etat.LECTURE || etat== Etat.PAUSE)){
+            iterateur.tuer();
+            iterateur = iterateur.nouvelIterateur(indiceOptionSelectionnée.get());
+        }
+        getChildren().set(1, MULTIMEDIA[1]);
         MULTIMEDIA[2].requestFocus();
         iterateur.suivant();
+        if (indiceOptionSelectionnée.get() > 1) {
+            MULTIMEDIA[1].setDisable(false);
+            MULTIMEDIA[3].setDisable(false);
+            getChildren().set(1, MULTIMEDIA[1]);
+        }
     }
 
-    private void saisirActionEventPause (ActionEvent event) {
+    private synchronized void saisirActionEventPause (ActionEvent event) {
         iterateur.suspendre();
         getChildren().set(1, MULTIMEDIA[1]);
         MULTIMEDIA[1].requestFocus();
@@ -143,10 +163,8 @@ final class Multimedia extends GridPane {
             case "aPrecedent" :
 
                 MULTIMEDIA[0].setDisable(!iterateur.aPrecedent()) ;
-                Platform.runLater(() -> {
-                    if(!iterateur.aPrecedent())
-                        MULTIMEDIA[2].requestFocus();
-                });
+                if(!iterateur.aPrecedent()) 
+                    Platform.runLater(MULTIMEDIA[2]::requestFocus);
                 break ;
 
             case "precedent" :
@@ -168,13 +186,19 @@ final class Multimedia extends GridPane {
             case "aSuivant" :
 
                 MULTIMEDIA[2].setDisable(!iterateur.aSuivant()) ;
-                Platform.runLater(() -> {
-                    if(!iterateur.aSuivant()) {
-                        getChildren().set(1, MULTIMEDIA[1]);
-                        MULTIMEDIA[0].requestFocus();
+                if(!iterateur.aSuivant()) {
+                    Platform.runLater(MULTIMEDIA[0]::requestFocus);
+                    if (indiceOptionSelectionnée.get() == 2) {
+                        iterateur.tuer();
+                        iterateur = iterateur.nouvelIterateur(indiceOptionSelectionnée.get());
                     }
-                });
+                }
                 break ;
+                
+            case "etat" :
+                Etat etat = (Etat)evt.getNewValue() ;
+                if (etat == Etat.FIN)
+                    Platform.runLater(this::désactiverLanceur);
         }
     }
 }

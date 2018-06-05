@@ -9,6 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static javax.management.timer.Timer.ONE_HOUR;
+import static javax.management.timer.Timer.ONE_MINUTE;
+import static javax.management.timer.Timer.ONE_SECOND;
 
 public class TimeStamp {
     
@@ -16,7 +19,6 @@ public class TimeStamp {
     public static final String FORMAT_HMS = "(([01]\\d)|(2[0-3])):[0-5]\\d:[0-5]\\d" ;
     public static final String FORMAT_DATE = "\\d{4}-\\d{2}-\\d{2}" ;
     public static final String FORMAT_DATE_HEURE = FORMAT_DATE + "_" + FORMAT_HMS ;
-    public static final int LONGUEUR_FORMAT_DATE_HEURE = "yyyy-MM-jj_HH:mm:ss".length() ;
             
     private static final SimpleDateFormat TIMESTAMP_CONSOLE_FORMAT = new SimpleDateFormat("[HH:mm:ss] ") ;
     
@@ -90,6 +92,24 @@ public class TimeStamp {
         return    Long.parseUnsignedLong(split[0])*3600
                 + Long.parseUnsignedLong(split[1])*60
                 + Long.parseUnsignedLong(split[2]) ;
+    }
+    
+    public static String convertirDureeVersString (long duree) {
+        String H,M,S,MS ;
+        long h,m,s,ms ;
+        long reste ;
+        boolean bh, bm, bs ;
+        h = duree / ONE_HOUR ;
+        reste = duree % ONE_HOUR ;
+        m = reste / ONE_MINUTE ;
+        reste %= ONE_MINUTE ;
+        s = reste / ONE_SECOND ;
+        ms = reste % ONE_SECOND ;
+        H = (bh = h > 0) ? h + " heure" + (h > 1 ? "s" : "") : "" ;
+        M = (bm = bh || m > 0) ? (bh && (s > 0 || ms > 0) ? ", " : bh ? " et " : "") + m + " minute" + (m > 1 ? "s" : "") : "" ;
+        S = (bs = bm || s > 0) ? (bm && ms > 0 ? ", " : bm ? " et " : "") + s + " seconde" + (s > 1 ? "s" : "") : "" ;
+        MS = ms > 0 ? (bs ? " et " : "") + ms + " milliseconde" + (ms > 1 ? "s" : "") : "" ;
+        return H+M+S+MS ;
     }
     
     public static String getTimestampAffichageConsole () {

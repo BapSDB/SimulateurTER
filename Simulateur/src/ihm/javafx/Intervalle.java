@@ -99,7 +99,7 @@ final class Intervalle extends ComboBox<Intervalle.DureeIntervalle> {
     
     private void ecouterTextProperty (Observable observable) {
         long temps ;
-        if (getEditor().getText().trim().isEmpty())
+        if (getEditor().getText() != null && getEditor().getText().trim().isEmpty())
             Platform.runLater(() -> {
                 getEditor().setBackground(WHITE_BACKGROUND);
             });
@@ -137,7 +137,7 @@ final class Intervalle extends ComboBox<Intervalle.DureeIntervalle> {
             intervalle = convertirFormatHMSVersLong(duree)*ONE_SECOND ;
         else
             try {
-                intervalle = Long.parseUnsignedLong(duree) ;
+                intervalle = (intervalle = Long.parseUnsignedLong(duree)) < 100l ? 100 : intervalle ;
             } catch (NumberFormatException numberFormatException) {
                 intervalle = -1l ;
             }

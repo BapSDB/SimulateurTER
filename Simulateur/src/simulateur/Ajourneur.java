@@ -4,10 +4,10 @@ package simulateur;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import static javax.management.timer.Timer.ONE_SECOND;
 import static traducteur.Traducteur.AFFICHAGE;
+import static util.TimeStamp.convertirDureeVersString;
 
-class Ajourneur extends Iterateur {
+final class Ajourneur extends Iterateur {
     
     private final Timer TIMER = new Timer() ;
     private TimerTask tache = new AfficherLigneSuivante() ;
@@ -17,38 +17,40 @@ class Ajourneur extends Iterateur {
         super(entete, contenu);
     }
     
+    protected Ajourneur (Iterateur iterateur) {
+        super(iterateur);
+    }
+    
     @Override
-    public synchronized void lancer () {
+    public void lancer () {
         if (etat == Etat.EN_ATTENTE) {
-            AFFICHAGE.setAffichage("Affichage d'une ligne de données par intervalle de " + intervalle/ONE_SECOND + " seconde(s)");
+            AFFICHAGE.setAffichage("Affichage d'une ligne de données par intervalle de " + convertirDureeVersString(intervalle));
             TIMER.scheduleAtFixedRate(tache, intervalle, intervalle);
         }
         else {
-            AFFICHAGE.setAffichage("Reprise de l'affichage d'une ligne de données par intervalle de " + intervalle/ONE_SECOND + " seconde(s)");
+            AFFICHAGE.setAffichage("Reprise de l'affichage d'une ligne de données par intervalle de " + convertirDureeVersString(intervalle));
             TIMER.scheduleAtFixedRate(tache = new AfficherLigneSuivante(), temps, intervalle);
         }
-        etat = Etat.LECTURE ;
+        setEtat(Etat.LECTURE) ;
     }
 
     @Override
-    public synchronized void suspendre() {
+    public void suspendre() {
         temps = System.currentTimeMillis() % intervalle ;
-        AFFICHAGE.setAffichage("Pause de l'affichage d'une ligne de données par intervalle de " + intervalle/ONE_SECOND + " seconde(s)");
+        AFFICHAGE.setAffichage("Pause de l'affichage d'une ligne de données par intervalle de " + convertirDureeVersString(intervalle));
         tuerTache();
     }
     
     private void tuerTache () {
-        if (etat == Etat.LECTURE) {
-            tache.cancel();
-            TIMER.purge();
-            etat = Etat.PAUSE ;
-        }
+        tache.cancel();
+        TIMER.purge();
+        setEtat(aSuivant() ? Etat.PAUSE : Etat.FIN) ;
     }
 
     @Override
-    public synchronized void tuer() {
+    public void tuer() {
+        AFFICHAGE.setAffichage("Fin de l'affichage d'une ligne de données par intervalle de " + convertirDureeVersString(intervalle));
         TIMER.cancel() ;
-        etat = Etat.FIN ;
     }
     
     private class AfficherLigneSuivante extends TimerTask {

@@ -4,6 +4,7 @@ package ihm.javafx;
 import exceptions.SimulateurException;
 import static ihm.javafx.Options.ecouterOptions;
 import static ihm.javafx.Options.indiceOptionSelectionnée;
+import static ihm.javafx.Vue.ARBRE_REPERTOIRES;
 import ihm.javafx.Vue.ChargerToutLeFichier;
 import static ihm.javafx.Vue.MULTIMEDIA;
 import static ihm.javafx.Vue.fichierSélectionné;
@@ -25,7 +26,7 @@ class TacheChargerFichier extends Task<Void> {
     protected Void call() throws Exception {
         try {
             
-            iterateur = nouveauFormateur(nouvelleFabrique(fichierSélectionné).creer()).nouveauSimulateur(indiceOptionSelectionnée.get()) ;
+            iterateur = nouveauFormateur(nouvelleFabrique(fichierSélectionné).creer()).nouvelIterateur(indiceOptionSelectionnée.get()) ;
             ecouterOptions();
             Platform.runLater(MULTIMEDIA::ecouterIterateur);
             TABLEAU.vider() ;
@@ -58,6 +59,10 @@ class TacheChargerFichier extends Task<Void> {
         
         if (indiceOptionSelectionnée.get() == 2)
             MULTIMEDIA.activerLanceur() ;
+        
+        Platform.runLater(() -> {
+            ARBRE_REPERTOIRES.creerArbre("traces");
+        });
 
     }
 }

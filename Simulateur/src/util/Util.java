@@ -15,7 +15,6 @@ public class Util {
 	return new String[]{nomFichier.substring(0, i+1), nomFichier.substring(i+1)} ;
     }
     
-    
     public static String obtenirNomFichier (String nomFichier) {
 	return separerCheminNomFichier(nomFichier)[1] ;
     }

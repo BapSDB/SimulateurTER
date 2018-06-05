@@ -12,21 +12,38 @@ public class Iterateur {
     protected final List<String> entete;
     protected final List<List<String>> contenu;
     protected ListIterator<List<String>> iterateur;
+    protected PropertyChangeListener ecouteurEtat;
     
-    PropertyChangeSupport changeSupport;
-    private List<String> suivant;
-    private List<String> precedent;
+    PropertyChangeSupport proprietesIterateur, proprietesEtat ;
+    private List<String> precedent ;
+    private List<String> suivant ;
     private boolean aSuivant ;
     private boolean aPrecedent ;
+
     public static enum Etat {EN_ATTENTE, PAUSE, LECTURE, FIN} ;
     public static Etat etat ;
     
     public Iterateur(List<String> entete, List<List<String>> contenu) {
         this.entete = entete;
-        this.contenu = contenu;
+        this.contenu = java.util.Collections.synchronizedList(contenu);
         this.iterateur = this.contenu.listIterator();
-        this.changeSupport = new PropertyChangeSupport(this);
+        this.proprietesIterateur = new PropertyChangeSupport(this);
+        this.proprietesEtat = new PropertyChangeSupport(this);
         etat = Etat.EN_ATTENTE;
+    }
+    
+    protected Iterateur (Iterateur iterateur) {
+        this.entete = iterateur.entete;
+        this.contenu = iterateur.contenu;
+        this.iterateur = iterateur.iterateur;
+        this.proprietesIterateur = iterateur.proprietesIterateur;
+        this.proprietesEtat = iterateur.proprietesEtat;
+        this.precedent = iterateur.precedent;
+        this.suivant = iterateur.suivant;
+        this.aSuivant = iterateur.aSuivant;
+        this.aPrecedent = iterateur.aPrecedent;
+        etat = Etat.EN_ATTENTE;
+        mettreAjourIteration();
     }
     
     public final void mettreAjourIteration () {
@@ -34,11 +51,11 @@ public class Iterateur {
         setaPrecedent(iterateur.hasPrevious());
     }
     
-    public synchronized void lancer () {}
+    public void lancer () {}
     
-    public synchronized void suspendre() {}
+    public void suspendre() {}
     
-    public synchronized void tuer() {}
+    public void tuer() {}
     
     public final List<String> getEntete() {
         return entete;
@@ -70,13 +87,13 @@ public class Iterateur {
     protected final void setaSuivant(boolean aSuivant) {
         boolean ancienneValeur = this.aSuivant;
         this.aSuivant = aSuivant;
-        changeSupport.firePropertyChange("aSuivant", ancienneValeur, aSuivant);
+        proprietesIterateur.firePropertyChange("aSuivant", ancienneValeur, aSuivant);
     }
     
     protected final void setSuivant(List<String> suivant) {
-        List<String> ancienneValeur = this.suivant;
+        this.precedent = this.suivant;
         this.suivant = suivant;
-        changeSupport.firePropertyChange("suivant", ancienneValeur, suivant);
+        proprietesIterateur.firePropertyChange("suivant", this.precedent, this.suivant);
     }
     
     public final List<String> precedent() {
@@ -93,39 +110,39 @@ public class Iterateur {
     protected final void setaPrecedent(boolean aPrecedent) {
         boolean ancienneValeur = this.aPrecedent;
         this.aPrecedent = aPrecedent;
-        changeSupport.firePropertyChange("aPrecedent", ancienneValeur, aPrecedent);
+        proprietesIterateur.firePropertyChange("aPrecedent", ancienneValeur, aPrecedent);
     }
     
     protected final void setPrecedent(List<String> precedent) {
-        List<String> ancienneValeur = this.precedent;
+        this.suivant = this.precedent ;
         this.precedent = precedent;
-        changeSupport.firePropertyChange("precedent", ancienneValeur, precedent);
+        proprietesIterateur.firePropertyChange("precedent", this.suivant, this.precedent);
     }
     
     protected final void setEtat(Etat etat) {
         Etat ancienneValeur = Iterateur.etat ;
         Iterateur.etat = etat ;
-        changeSupport.firePropertyChange("etat", ancienneValeur, etat);
+        proprietesEtat.firePropertyChange("etat", ancienneValeur, etat);
+        proprietesIterateur.firePropertyChange("etat", ancienneValeur, etat);
     }
 
     public final void addPropertyChangeListener(PropertyChangeListener listener) {
-        changeSupport.addPropertyChangeListener(listener);
+        proprietesIterateur.addPropertyChangeListener(listener);
     }
     
     public final void removePropertyChangeListener(PropertyChangeListener listener) {
-        changeSupport.removePropertyChangeListener(listener);
+        proprietesIterateur.removePropertyChangeListener(listener);
     }
     
-    public final Iterateur nouvelAjourneur() {
-        Ajourneur ajourneur = new Ajourneur(entete, contenu);
-        ajourneur.iterateur = this.iterateur ;
-        return ajourneur ;
-    }
-    
-    public final Iterateur nouveauSimulateur() {
-        Simulateur simulateur = new Simulateur(entete, contenu);
-        simulateur.iterateur = this.iterateur ;
-        return simulateur ;
+    public Iterateur nouvelIterateur (int indice) {
+        
+        switch(indice) {
+            case 0 :
+            case 1 : return new Iterateur(this);
+            case 2 : return new Simulateur(this);
+            case 3 : return new Ajourneur(this);
+            default : throw new IllegalStateException();
+        }
     }
 
 }

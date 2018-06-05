@@ -27,6 +27,10 @@ public abstract class Traducteur {
 
     public Traducteur(FabriqueTraducteur ft) throws SimulateurException  {
 	this.ft = ft ;
+        initialiser();
+    }
+    
+    private void initialiser () throws SimulateurException {
         convertisseur = getConvertisseur() ;
         appliquerTraduction() ;
     }

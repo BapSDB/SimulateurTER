@@ -144,7 +144,7 @@ public final class Formateur {
         this.traducteur = traducteur;
     }
 
-    public Iterateur nouveauSimulateur (int indice) {
+    public Iterateur nouvelIterateur (int indice) {
         
         switch(indice) {
             case 0 :

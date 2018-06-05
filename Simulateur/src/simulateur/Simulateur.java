@@ -2,27 +2,36 @@
 package simulateur;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.text.ParseException;
 import java.util.List;
 import static traducteur.Traducteur.AFFICHAGE;
 import static traducteur.Traducteur.convertisseur;
+import static util.TimeStamp.convertirDureeVersString;
 
-class Simulateur extends Iterateur {
+final class Simulateur extends Iterateur {
     
-    private final Thread SIMULATION ;
-    private PropertyChangeListener ecouteurSimulation ;
+    private Thread SIMULATION ;
     
     public Simulateur(List<String> entete, List<List<String>> contenu) {
         super(entete, contenu);
+        initialiser();
+    }
+    
+    protected Simulateur (Iterateur iterateur) {
+        super(iterateur);
+        initialiser();
+    }
+    
+    private void initialiser () {
         SIMULATION = new Thread(new Simulation()) ;
-        if (ecouteurSimulation != null)
-            changeSupport.removePropertyChangeListener(ecouteurSimulation) ;
-        changeSupport.addPropertyChangeListener(this::interrompreSimulation) ;
+        etat = Etat.EN_ATTENTE ;
+        if (ecouteurEtat != null)
+            proprietesEtat.removePropertyChangeListener(ecouteurEtat);
+        proprietesEtat.addPropertyChangeListener(ecouteurEtat = this::ecouterEtat) ;
     }
     
     @Override
-    public synchronized void lancer() {
+    public void lancer() {
         if (etat == Etat.EN_ATTENTE) {
             AFFICHAGE.setAffichage("Lancement de la simulation") ;
             SIMULATION.start() ;
@@ -35,90 +44,122 @@ class Simulateur extends Iterateur {
     }
 
     @Override
-    public synchronized void suspendre() {
-        AFFICHAGE.setAffichage("Simulation en Pause") ;
+    public void suspendre() {
         setEtat(Etat.PAUSE);
+        AFFICHAGE.setAffichage("Simulation en Pause") ;
     }
     
     @Override
-    public synchronized void tuer() {
+    public void tuer() {
         setEtat(Etat.FIN);
     }
     
-    private synchronized void interrompreSimulation (PropertyChangeEvent evt) {
-        if(evt.getPropertyName().equals("etat")) {
-            SIMULATION.interrupt() ;
-        }
+    private void ecouterEtat (PropertyChangeEvent evt) {
+        SIMULATION.interrupt() ;
     }
     
     private class Simulation implements Runnable {
         
-        private long date, temps ;
+        private long date, timestamp ;
         private List<String> donnees ;
+        private int i ;
         
-        private synchronized boolean afficherPremiereLigne () {
-            donnees = iterateur.next() ;
+        private long convertirDate (long datePrecedente) {
             try {
-                date = convertisseur.parse(donnees.get(0)).getTime() ;
+                return (date = convertisseur.parse(donnees.get(0)).getTime()) - datePrecedente ;
             } catch (ParseException ex) {
-                ex.printStackTrace(System.err);
-                return false ;
+                return (date = Long.parseUnsignedLong(donnees.get(0).trim())) - datePrecedente ;
             }
+            
+        }
+        
+        private long convertirDate (String date) {
+            try {
+                return convertisseur.parse(date).getTime() ;
+            } catch (ParseException ex) {
+                return Long.parseUnsignedLong(date.trim()) ;
+            }
+            
+        }
+        
+        private boolean afficherPremiereLigne (boolean premierTimestamp) {
+            timestamp = convertirDate(date) ;
+            if (!premierTimestamp) {
+                AFFICHAGE.setAffichage("Prochaine MAJ : " + convertirDureeVersString(timestamp));
+                if (!afficherLigne())
+                    return false ;
+            }
+            iterateur.next() ;
             setSuivant(donnees);
             mettreAjourIteration();
+            i = iterateur.nextIndex() ;
             return true ;
         }
         
         private void attendreDelai () throws InterruptedException {
-            Thread.sleep(temps) ;
+            Thread.sleep(timestamp) ;
         }
-
-        private boolean afficherProchaineLigne () {
-            
-            donnees = iterateur.next() ;
-            
-            try {
-                temps = convertisseur.parse(donnees.get(0)).getTime() - date ;
-            } catch (ParseException ex) {
-                ex.printStackTrace(System.err);
-                return false ;
-            }
-            
+        
+        private synchronized boolean afficherLigne () {
+            long tempsEcoule = System.nanoTime() ;
             try {
                 attendreDelai();
             } catch (InterruptedException ex) {
                 try {
-                    synchronized(this) {
+                    if (etat == Etat.PAUSE) {
+                        timestamp -= ((System.nanoTime() - tempsEcoule)  / 1_000_000l) ;
                         wait() ;
                     }
-                    temps = System.currentTimeMillis() - temps ;
-                    attendreDelai();
+                    else
+                        return false ;
                 } catch (InterruptedException ex1) {
-                    if (etat == Etat.LECTURE)
-                        synchronized(this) {
-                            notify() ;
-                        }
+                    if (etat == Etat.LECTURE) {
+                        notify() ;
+                        AFFICHAGE.setAffichage("Temps Restant : " + convertirDureeVersString(timestamp));
+                        afficherLigne() ;
+                    }
                     else
                         return false ;
                 }
             }
+            return true ;
+        }
+
+        private boolean afficherProchaineLigne () {
+            donnees = contenu.get(i) ;
+            timestamp = convertirDate(date) ;
+            AFFICHAGE.setAffichage("Prochaine MAJ : " + convertirDureeVersString(timestamp));
+            if (!afficherLigne())
+                return false ;
+            iterateur.next() ;
             setSuivant(donnees);
             mettreAjourIteration();
+            i = iterateur.nextIndex() ;
             return true ;
         }
         
         
         @Override
-        public synchronized void run() {
+        public void run() {
             
-            if (aSuivant())
-                if(!afficherPremiereLigne())
+            i = iterateur.nextIndex() ;
+            donnees = contenu.get(i) ;
+            date = i == 0 ? 0l : convertirDate(contenu.get(i-1).get(0)) ;
+            
+            if (aSuivant()) {
+                if(!afficherPremiereLigne(i == 0)) {
+                    AFFICHAGE.setAffichage("Fin de la simulation") ;
                     return ;
+                }
+            }
 
             while (aSuivant())
-                    if (!afficherProchaineLigne())
-                        return ;
-                    
+                if (!afficherProchaineLigne()) {
+                    AFFICHAGE.setAffichage("Fin de la simulation") ;
+                    return ;
+                }
+            
+            AFFICHAGE.setAffichage("Fin de la simulation") ;
         }
     }
 }

@@ -74,9 +74,11 @@ public final class Options extends VBox {
     private static void ecouterOptions (Observable observable) {
         if(CHARGER_FICHIER.isSelected()) {
             iterateur.tuer() ;
+            iterateur = iterateur.nouvelIterateur(indiceOptionSelectionnée.get());
+            ecouterOptions();
             switch(indiceOptionSelectionnée.get()) {
                 case 0 :
-                    MULTIMEDIA.désactiverLanceur();
+                    Platform.runLater(MULTIMEDIA::désactiverLanceur);
                     iterateur.setIterateur(iterateur.getContenu().listIterator());
                     TABLEAU.getItems().clear();
                     Platform.runLater(iterateur::mettreAjourIteration);
@@ -84,20 +86,15 @@ public final class Options extends VBox {
                     afficherMessage("Le contenu de la table a été vidé");
                     break;
                 case 1 :
-                    MULTIMEDIA.désactiverLanceur();
+                    Platform.runLater(MULTIMEDIA::désactiverLanceur);
                     charger(new ChargerToutLeFichier());
                     afficherMessage("La table contient toutes les données");
                     break ;
                 case 2 :
-                    iterateur = iterateur.nouveauSimulateur();
-                    ecouterOptions();
-                    Platform.runLater(MULTIMEDIA::ecouterIterateur);
+                    Platform.runLater(MULTIMEDIA::activerLanceur);
                     break ;
                 case 3 :
-                    iterateur = iterateur.nouvelAjourneur();
-                    ecouterOptions();
-                    Platform.runLater(MULTIMEDIA::ecouterIterateur);
-                    break ;
+                    INTERVALLE.requestFocus();
             }
         }
     }

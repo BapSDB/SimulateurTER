@@ -44,7 +44,7 @@ public class Vue extends Application {
     
     private static final String MESSAGE_INTRODUCTION = "Bienvenue dans le simulateur de traces :\n"
             + "\t- Veuillez sélectionner un fichier de traces à charger en cochant l'une des cases de l'arbre des répertoires en haut à gauche de votre écran.\n"
-            + "\t- Puis choissisez l'une des stratégies de simulation à appliquer.\n" ;
+            + "\t- Puis choissisez l'une des stratégies de simulation à appliquer." ;
     private static final Rectangle2D RECTANGLE = Screen.getPrimary().getBounds() ;
     static final TextFlow AFFICHAGE_CONSOLE = new TextFlow() ;
     private static final ScrollPane CONSOLE = new ScrollPane() ;
@@ -67,7 +67,8 @@ public class Vue extends Application {
         primaryStage.setFullScreen(true);
         primaryStage.setOnCloseRequest((event) -> {
             AFFICHAGE.removePropertyChangeListener(ECOUTEUR_AFFICHAGE);
-            iterateur.tuer();
+            if (iterateur != null)
+                iterateur.tuer();
         });
         
         SCENE.getStylesheets().add("ressources/button.css");
@@ -131,7 +132,7 @@ public class Vue extends Application {
     
     static void afficherMessage (String message) {
         Platform.runLater(() -> {
-            AFFICHAGE_CONSOLE.getChildren().add(new Text(getTimestampAffichageConsole() + message + "\n"));
+            AFFICHAGE_CONSOLE.getChildren().add(new Text("\n" + getTimestampAffichageConsole() + message));
         });
     }
     
@@ -150,7 +151,12 @@ public class Vue extends Application {
             iterateur.getIterateur().forEachRemaining(this::ajouterDonnees);
             Platform.runLater(iterateur::mettreAjourIteration);
             Platform.runLater(Vue::mettreAjourAffichageInterface);
+            Platform.runLater(this::derouler);
             return null ;
+        }
+        
+        private void derouler () {
+            TABLEAU.scrollTo(iterateur.getContenu().size()-1) ;
         }
         
         private void ajouterDonnees (List<String> donnees) {

@@ -6,8 +6,9 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import util.ListeChaineeOrdonnee;
-import static util.Util.NB_EVENEMENTS;
 
 public class TableauCSV {
     
@@ -62,7 +63,7 @@ public class TableauCSV {
     }
     
     private final Map<String, PositionPadding> nomsObjets = new LinkedHashMap<>() ;
-    private final Map<String, ListeChaineeOrdonnee<ValeurPosition>> tableau = new LinkedHashMap<>(NB_EVENEMENTS) ;
+    private final NavigableMap<String, ListeChaineeOrdonnee<ValeurPosition>> tableau = new TreeMap<>(Comparator.naturalOrder()) ;
     private int paddingTimeStamp ;
     
     public void ecrireNomObjet (String nomObjet, BufferedWriter config) throws IOException {
@@ -85,7 +86,7 @@ public class TableauCSV {
 	return nomsObjets;
     }
 
-    public Map<String, ListeChaineeOrdonnee<ValeurPosition>> getTableau() {
+    public NavigableMap<String, ListeChaineeOrdonnee<ValeurPosition>> getTableau() {
 	return tableau;
     }
     

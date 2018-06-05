@@ -31,7 +31,7 @@ public class TraducteurMQTT extends Traducteur {
     private static final String VALEUR = "\"message\":\".+\"" ;
     private  static final Pattern PATTERN_MQQT = Pattern.compile(TIMESTAMP+SEPARATEUR+"\\{"+TOPIC+","+NOM_OBJET+","+TYPE+","+VALEUR+"\\}") ;
     
-    private static final SimpleDateFormat CONVERTISSEUR = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss") ;
+    private static final SimpleDateFormat CONVERTISSEUR = new SimpleDateFormat() ;
     
     public TraducteurMQTT(FabriqueTraducteurMQTT ft) throws SimulateurException {
 	super(ft);
